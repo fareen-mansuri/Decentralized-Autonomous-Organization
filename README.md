@@ -187,6 +187,8 @@ For questions, issues, or contributions, please:
 - Email us at support@dao-project.com
 
 ---
+0x6c5426e59b8b0ead593e70f6fec20ec41282c0a9fbd95c61566639b4fdbc515c
+<img width="1350" height="624" alt="Screenshot 2025-07-17 145428" src="https://github.com/user-attachments/assets/765ade7c-c28e-4b37-9d40-ec58e909adf7" />
 
 **Built with ❤️ using Solidity and Hardhat**## Things you need to do:
 
@@ -196,3 +198,4 @@ For questions, issues, or contributions, please:
 - Readme.md file - Add the Readme content inside this file.
 - package.json file – Replace the `"name"` property value from `"Project-Title"` to your actual project title. <br/>
 *Example:* `"name": "crowdfunding-smartcontract"`
+

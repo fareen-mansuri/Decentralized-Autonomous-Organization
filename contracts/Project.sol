@@ -1,4 +1,4 @@
- // SPDX-License-Identifier: MIT
+  // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
 /**
@@ -28,6 +28,8 @@ contract EnhancedDAO {
         uint256 executionDelay;
         bool vetoed;
         address vetoer;
+        mapping(address => string) voteReasons;
+        uint256 discussionDeadline;
     }
     
     // Struct for member profile
@@ -42,6 +44,12 @@ contract EnhancedDAO {
         uint256 lastActivity;
         string[] skills;
         string[] interests;
+        uint256 joinedAt;
+        uint256 contributionScore;
+        bool isBlacklisted;
+        string email;
+        string discord;
+        string twitter;
     }
     
     // Struct for committees
@@ -55,6 +63,9 @@ contract EnhancedDAO {
         string purpose;
         uint256 budget;
         uint256 spentBudget;
+        address chairperson;
+        uint256[] committeeProposals;
+        mapping(address => bool) hasVotingRights;
     }
     
     // Struct for bounties
@@ -72,6 +83,10 @@ contract EnhancedDAO {
         BountyStatus status;
         string[] deliverables;
         uint256 createdAt;
+        address[] applicants;
+        mapping(address => string) applications;
+        uint256 approvalCount;
+        mapping(address => bool) approvals;
     }
     
     // Struct for treasury proposals
@@ -85,6 +100,9 @@ contract EnhancedDAO {
         bool executed;
         uint256 deadline;
         ProposalCategory category;
+        bool isRecurring;
+        uint256 recurringInterval;
+        uint256 nextExecution;
     }
     
     // Struct for voting snapshots
@@ -92,6 +110,59 @@ contract EnhancedDAO {
         uint256 blockNumber;
         mapping(address => uint256) votingPowerAtSnapshot;
         uint256 totalSupplyAtSnapshot;
+        string description;
+        uint256 timestamp;
+    }
+    
+    // Struct for governance parameters
+    struct GovernanceParams {
+        uint256 votingPeriod;
+        uint256 quorum;
+        uint256 minProposalStake;
+        uint256 proposalExecutionDelay;
+        uint256 reputationThreshold;
+        uint256 maxVotingPeriod;
+        uint256 minVotingPeriod;
+        uint256 vetoWindow;
+    }
+    
+    // Struct for member achievements
+    struct Achievement {
+        string title;
+        string description;
+        uint256 reputationReward;
+        bool isActive;
+        mapping(address => bool) hasAchievement;
+        mapping(address => uint256) achievementDate;
+    }
+    
+    // Struct for proposal discussions
+    struct Discussion {
+        uint256 proposalId;
+        address[] participants;
+        mapping(address => string[]) comments;
+        mapping(address => uint256) commentCount;
+        uint256 totalComments;
+        bool isActive;
+    }
+    
+    // Struct for staking mechanism
+    struct Stake {
+        uint256 amount;
+        uint256 stakingTime;
+        uint256 lockPeriod;
+        uint256 rewardRate;
+        bool isActive;
+        uint256 lastRewardClaim;
+    }
+    
+    // Struct for proposal metrics
+    struct ProposalMetrics {
+        uint256 engagementScore;
+        uint256 participationRate;
+        uint256 averageVoteTime;
+        uint256 discussionActivity;
+        mapping(address => uint256) voteTimestamps;
     }
     
     // Enums
@@ -104,7 +175,10 @@ contract EnhancedDAO {
         BOUNTY_CREATION,
         GOVERNANCE_UPGRADE,
         PARTNERSHIP,
-        STRATEGIC
+        STRATEGIC,
+        GRANT,
+        CODE_UPGRADE,
+        POLICY_CHANGE
     }
     
     enum BountyStatus {
@@ -113,7 +187,8 @@ contract EnhancedDAO {
         IN_PROGRESS,
         SUBMITTED,
         COMPLETED,
-        CANCELLED
+        CANCELLED,
+        DISPUTED
     }
     
     enum ProposalCategory {
@@ -122,13 +197,22 @@ contract EnhancedDAO {
         OPERATIONS,
         RESEARCH,
         COMMUNITY,
-        INFRASTRUCTURE
+        INFRASTRUCTURE,
+        GRANTS,
+        PARTNERSHIPS
     }
     
     enum VoteOption {
         YES,
         NO,
         ABSTAIN
+    }
+    
+    enum MembershipTier {
+        BASIC,
+        PREMIUM,
+        PLATINUM,
+        DIAMOND
     }
     
     // State variables
@@ -146,7 +230,30 @@ contract EnhancedDAO {
     mapping(address => uint256[]) public memberProposals;
     mapping(string => uint256[]) public proposalsByTag;
     mapping(address => uint256) public memberReputation;
-    mapping(address => mapping(uint256 => bool)) public memberCommittees; // member => committeeId => isMember
+    mapping(address => mapping(uint256 => bool)) public memberCommittees;
+    
+    // New mappings for additional functionality
+    mapping(address => MembershipTier) public membershipTiers;
+    mapping(address => Stake) public memberStakes;
+    mapping(uint256 => Discussion) public proposalDiscussions;
+    mapping(uint256 => Achievement) public achievements;
+    mapping(uint256 => ProposalMetrics) public proposalMetrics;
+    mapping(address => uint256[]) public memberAchievements;
+    mapping(address => bool) public isVerifiedMember;
+    mapping(address => uint256) public memberNFTCount;
+    mapping(address => mapping(address => uint256)) public memberRatings;
+    mapping(address => uint256) public totalRatingsReceived;
+    mapping(address => uint256) public averageRating;
+    mapping(uint256 => address[]) public proposalEndorsers;
+    mapping(uint256 => mapping(address => bool)) public hasEndorsed;
+    mapping(address => uint256) public lastProposalTime;
+    mapping(address => uint256) public proposalCooldown;
+    mapping(uint256 => uint256) public proposalImplementationCost;
+    mapping(address => bool) public isModerator;
+    mapping(address => uint256) public moderatorSince;
+    mapping(uint256 => bool) public isUrgentProposal;
+    mapping(address => uint256) public memberContributions;
+    mapping(address => string[]) public memberBadges;
     
     uint256 public proposalCount;
     uint256 public memberCount;
@@ -154,16 +261,18 @@ contract EnhancedDAO {
     uint256 public bountyCount;
     uint256 public treasuryProposalCount;
     uint256 public snapshotCount;
+    uint256 public achievementCount;
+    uint256 public totalStakedTokens;
+    uint256 public discussionCount;
     
     address public admin;
-    uint256 public votingPeriod = 7 days;
-    uint256 public quorum = 51; // 51% quorum required
-    uint256 public minProposalStake = 0.1 ether;
+    GovernanceParams public governanceParams;
     uint256 public treasury;
-    uint256 public proposalExecutionDelay = 2 days;
-    uint256 public maxVotingPeriod = 30 days;
-    uint256 public minVotingPeriod = 1 days;
-    uint256 public reputationThreshold = 100; // Minimum reputation to create proposals
+    uint256 public stakingRewardPool;
+    uint256 public membershipFee = 0.01 ether;
+    uint256 public proposalFeeCollected;
+    uint256 public minimumStakeAmount = 100 * 10**18;
+    uint256 public stakingAPY = 500; // 5%
     
     // Token-based governance
     mapping(address => uint256) public tokenBalance;
@@ -175,29 +284,40 @@ contract EnhancedDAO {
     mapping(address => address) public delegates;
     mapping(address => uint256) public delegatedVotes;
     mapping(address => address[]) public delegators;
+    mapping(address => bool) public isDelegateActive;
+    mapping(address => uint256) public delegationReward;
     
     // Emergency system
     bool public emergencyMode = false;
     uint256 public emergencyDeadline;
     address[] public emergencyCouncil;
     mapping(address => bool) public isEmergencyCouncilMember;
+    uint256 public emergencyProposalCount;
+    mapping(uint256 => bool) public isEmergencyProposal;
     
     // Multi-signature system for critical operations
     mapping(bytes32 => uint256) public multiSigProposals;
     mapping(bytes32 => mapping(address => bool)) public multiSigVotes;
     mapping(bytes32 => bool) public multiSigExecuted;
     uint256 public multiSigThreshold = 3;
+    address[] public multiSigSigners;
     
     // Veto system
     mapping(address => bool) public hasVetoPower;
     uint256 public vetoWindow = 3 days;
+    mapping(uint256 => uint256) public vetoCount;
     
     // Proposal categories and filters
     mapping(ProposalCategory => uint256) public categoryBudgets;
     mapping(ProposalCategory => uint256) public categorySpent;
+    mapping(ProposalCategory => bool) public categoryActive;
     
     // Time-locked proposals
     mapping(uint256 => uint256) public proposalUnlockTime;
+    
+    // Quadratic voting
+    mapping(uint256 => mapping(address => uint256)) public quadraticVoteCredits;
+    mapping(address => uint256) public memberVoteCredits;
     
     // Events
     event ProposalCreated(uint256 indexed proposalId, string title, address indexed proposer, ProposalType proposalType);
@@ -230,6 +350,23 @@ contract EnhancedDAO {
     event MultiSigVoteCast(bytes32 indexed proposalHash, address indexed signer);
     event MultiSigProposalExecuted(bytes32 indexed proposalHash);
     
+    // New events for additional functionality
+    event MemberStaked(address indexed member, uint256 amount, uint256 lockPeriod);
+    event StakeWithdrawn(address indexed member, uint256 amount);
+    event RewardsClaimedFromStaking(address indexed member, uint256 rewards);
+    event AchievementUnlocked(address indexed member, uint256 achievementId, string title);
+    event MembershipTierUpgraded(address indexed member, MembershipTier newTier);
+    event ProposalEndorsed(uint256 indexed proposalId, address indexed endorser);
+    event MemberRated(address indexed rater, address indexed rated, uint256 rating);
+    event MemberVerified(address indexed member, address indexed verifier);
+    event ProposalDiscussionStarted(uint256 indexed proposalId);
+    event CommentAdded(uint256 indexed proposalId, address indexed commenter);
+    event ModeratorAdded(address indexed moderator);
+    event ModeratorRemoved(address indexed moderator);
+    event UrgentProposalCreated(uint256 indexed proposalId);
+    event BadgeAwarded(address indexed member, string badge);
+    event QuadraticVoteCast(uint256 indexed proposalId, address indexed voter, uint256 credits, uint256 votes);
+    
     // Modifiers
     modifier onlyMember() {
         require(isMember[msg.sender], "Only members can perform this action");
@@ -242,7 +379,7 @@ contract EnhancedDAO {
     }
     
     modifier onlyActiveMember() {
-        require(isMember[msg.sender] && memberProfiles[msg.sender].isActive, "Only active members can perform this action");
+        require(isMember[msg.sender] && memberProfiles[msg.sender].isActive && !memberProfiles[msg.sender].isBlacklisted, "Only active, non-blacklisted members can perform this action");
         _;
     }
     
@@ -292,16 +429,53 @@ contract EnhancedDAO {
         _;
     }
     
+    modifier onlyModerator() {
+        require(isModerator[msg.sender] || msg.sender == admin, "Only moderators can perform this action");
+        _;
+    }
+    
+    modifier onlyVerifiedMember() {
+        require(isVerifiedMember[msg.sender], "Only verified members can perform this action");
+        _;
+    }
+    
+    modifier respectsProposalCooldown() {
+        require(block.timestamp >= lastProposalTime[msg.sender] + proposalCooldown[msg.sender], "Proposal cooldown period not met");
+        _;
+    }
+    
+    modifier notBlacklisted() {
+        require(!memberProfiles[msg.sender].isBlacklisted, "Member is blacklisted");
+        _;
+    }
+    
     // Constructor
     constructor() {
         admin = msg.sender;
         isMember[msg.sender] = true;
         memberSince[msg.sender] = block.timestamp;
         votingPower[msg.sender] = 100;
-        tokenBalance[msg.sender] = 1000 * 10**18; // Initial token supply
+        tokenBalance[msg.sender] = 1000 * 10**18;
         totalTokenSupply = 1000 * 10**18;
         memberCount = 1;
-        memberReputation[msg.sender] = 500; // Admin starts with high reputation
+        memberReputation[msg.sender] = 500;
+        membershipTiers[msg.sender] = MembershipTier.DIAMOND;
+        isVerifiedMember[msg.sender] = true;
+        isModerator[msg.sender] = true;
+        moderatorSince[msg.sender] = block.timestamp;
+        memberVoteCredits[msg.sender] = 100;
+        
+        // Initialize governance parameters
+        governanceParams = GovernanceParams({
+            votingPeriod: 7 days,
+            quorum: 51,
+            minProposalStake: 0.1 ether,
+            proposalExecutionDelay: 2 days,
+            reputationThreshold: 100,
+            maxVotingPeriod: 30 days,
+            minVotingPeriod: 1 days,
+            vetoWindow: 3 days
+        });
         
         // Initialize admin profile
         memberProfiles[msg.sender] = MemberProfile({
@@ -314,13 +488,20 @@ contract EnhancedDAO {
             isActive: true,
             lastActivity: block.timestamp,
             skills: new string[](0),
-            interests: new string[](0)
+            interests: new string[](0),
+            joinedAt: block.timestamp,
+            contributionScore: 100,
+            isBlacklisted: false,
+            email: "",
+            discord: "",
+            twitter: ""
         });
         
         // Add admin to emergency council
         emergencyCouncil.push(msg.sender);
         isEmergencyCouncilMember[msg.sender] = true;
         hasVetoPower[msg.sender] = true;
+        multiSigSigners.push(msg.sender);
         
         // Initialize category budgets
         categoryBudgets[ProposalCategory.DEVELOPMENT] = 10 ether;
@@ -329,467 +510,254 @@ contract EnhancedDAO {
         categoryBudgets[ProposalCategory.RESEARCH] = 7 ether;
         categoryBudgets[ProposalCategory.COMMUNITY] = 2 ether;
         categoryBudgets[ProposalCategory.INFRASTRUCTURE] = 8 ether;
+        categoryBudgets[ProposalCategory.GRANTS] = 15 ether;
+        categoryBudgets[ProposalCategory.PARTNERSHIPS] = 5 ether;
+        
+        // Set all categories as active
+        for (uint256 i = 0; i < 8; i++) {
+            categoryActive[ProposalCategory(i)] = true;
+        }
+        
+        // Initialize some achievements
+        _createAchievement("First Proposal", "Created your first proposal", 25);
+        _createAchievement("Active Voter", "Participated in 10 votes", 50);
+        _createAchievement("Proposal Master", "Had 5 proposals approved", 100);
+        _createAchievement("Community Builder", "Helped onboard 10 new members", 75);
     }
     
     // Receive function for treasury deposits
     receive() external payable {
         treasury += msg.value;
+        stakingRewardPool += msg.value / 10; // 10% goes to staking rewards
         emit TreasuryDeposit(msg.sender, msg.value);
     }
     
     /**
-     * @dev Enhanced proposal creation with more features
+     * @dev Join the DAO as a new member
      */
-    function createProposal(
-        string memory _title, 
-        string memory _description,
-        ProposalType _proposalType,
-        address _targetAddress,
-        uint256 _value,
-        bytes memory _data,
-        string[] memory _tags,
-        uint256 _customQuorum,
-        uint256 _customVotingPeriod
-    ) 
-        external 
-        payable
-        onlyActiveMember
-        notInEmergencyMode
-        hasReputation(reputationThreshold)
-    {
-        require(bytes(_title).length > 0, "Title cannot be empty");
-        require(bytes(_description).length > 0, "Description cannot be empty");
-        require(msg.value >= minProposalStake, "Insufficient proposal stake");
-        require(_customVotingPeriod >= minVotingPeriod && _customVotingPeriod <= maxVotingPeriod, "Invalid voting period");
-        require(_customQuorum <= 100, "Quorum cannot exceed 100%");
-        
-        uint256 proposalId = proposalCount++;
-        uint256 deadline = block.timestamp + (_customVotingPeriod > 0 ? _customVotingPeriod : votingPeriod);
-        uint256 executionDelay = (_proposalType == ProposalType.GOVERNANCE_UPGRADE) ? proposalExecutionDelay * 2 : proposalExecutionDelay;
-        
-        proposals[proposalId] = Proposal({
-            id: proposalId,
-            title: _title,
-            description: _description,
-            proposer: msg.sender,
-            yesVotes: 0,
-            noVotes: 0,
-            abstainVotes: 0,
-            deadline: deadline,
-            executed: false,
-            exists: true,
-            proposalType: _proposalType,
-            targetAddress: _targetAddress,
-            value: _value,
-            data: _data,
-            minQuorum: _customQuorum > 0 ? _customQuorum : quorum,
-            creationTime: block.timestamp,
-            tags: _tags,
-            executionDelay: executionDelay,
-            vetoed: false,
-            vetoer: address(0)
-        });
-        
-        memberProposals[msg.sender].push(proposalId);
-        memberProfiles[msg.sender].proposalsCreated++;
-        
-        // Add to tags mapping
-        for (uint256 i = 0; i < _tags.length; i++) {
-            proposalsByTag[_tags[i]].push(proposalId);
-        }
-        
-        // Update member activity
-        memberProfiles[msg.sender].lastActivity = block.timestamp;
-        
-        emit ProposalCreated(proposalId, _title, msg.sender, _proposalType);
-    }
-    
-    /**
-     * @dev Enhanced voting with more options
-     */
-    function vote(uint256 _proposalId, VoteOption _vote, string memory _reason) 
-        external 
-        onlyActiveMember
-        proposalExists(_proposalId)
-        votingActive(_proposalId)
-        notExecuted(_proposalId)
-    {
-        require(!hasVoted[_proposalId][msg.sender], "Already voted on this proposal");
-        
-        Proposal storage proposal = proposals[_proposalId];
-        uint256 voterPower = getVotingPower(msg.sender);
-        
-        hasVoted[_proposalId][msg.sender] = true;
-        memberVote[_proposalId][msg.sender] = _vote;
-        
-        if (_vote == VoteOption.YES) {
-            proposal.yesVotes += voterPower;
-        } else if (_vote == VoteOption.NO) {
-            proposal.noVotes += voterPower;
-        } else {
-            proposal.abstainVotes += voterPower;
-        }
-        
-        // Update member statistics
-        memberProfiles[msg.sender].votesParticipated++;
-        memberProfiles[msg.sender].lastActivity = block.timestamp;
-        
-        // Increase reputation for participation
-        memberReputation[msg.sender] += 5;
-        
-        emit VoteCast(_proposalId, msg.sender, _vote, voterPower);
-        emit ReputationUpdated(msg.sender, memberReputation[msg.sender]);
-    }
-    
-    /**
-     * @dev Delegate voting power to another member
-     */
-    function delegate(address _delegate) external onlyActiveMember {
-        require(_delegate != msg.sender, "Cannot delegate to yourself");
-        require(isMember[_delegate], "Delegate must be a member");
-        require(memberProfiles[_delegate].isActive, "Delegate must be active");
-        
-        address currentDelegate = delegates[msg.sender];
-        if (currentDelegate != address(0)) {
-            // Remove from current delegate
-            delegatedVotes[currentDelegate] -= votingPower[msg.sender];
-            // Remove from delegators array
-            address[] storage dels = delegators[currentDelegate];
-            for (uint256 i = 0; i < dels.length; i++) {
-                if (dels[i] == msg.sender) {
-                    dels[i] = dels[dels.length - 1];
-                    dels.pop();
-                    break;
-                }
-            }
-            emit DelegationRevoked(msg.sender, currentDelegate);
-        }
-        
-        delegates[msg.sender] = _delegate;
-        delegatedVotes[_delegate] += votingPower[msg.sender];
-        delegators[_delegate].push(msg.sender);
-        
-        emit Delegation(msg.sender, _delegate);
-    }
-    
-    /**
-     * @dev Revoke delegation
-     */
-    function revokeDelegation() external onlyActiveMember {
-        address currentDelegate = delegates[msg.sender];
-        require(currentDelegate != address(0), "No active delegation");
-        
-        delegates[msg.sender] = address(0);
-        delegatedVotes[currentDelegate] -= votingPower[msg.sender];
-        
-        // Remove from delegators array
-        address[] storage dels = delegators[currentDelegate];
-        for (uint256 i = 0; i < dels.length; i++) {
-            if (dels[i] == msg.sender) {
-                dels[i] = dels[dels.length - 1];
-                dels.pop();
-                break;
-            }
-        }
-        
-        emit DelegationRevoked(msg.sender, currentDelegate);
-    }
-    
-    /**
-     * @dev Create a committee
-     */
-    function createCommittee(
-        string memory _name,
-        string memory _description,
-        address[] memory _members,
-        string memory _purpose,
-        uint256 _budget
-    ) external onlyAdmin {
-        require(bytes(_name).length > 0, "Committee name required");
-        require(_members.length > 0, "At least one member required");
-        require(_budget <= treasury, "Insufficient treasury funds");
-        
-        uint256 committeeId = committeeCount++;
-        Committee storage committee = committees[committeeId];
-        committee.name = _name;
-        committee.description = _description;
-        committee.members = _members;
-        committee.purpose = _purpose;
-        committee.budget = _budget;
-        committee.createdAt = block.timestamp;
-        committee.isActive = true;
-        committee.spentBudget = 0;
-        
-        // Add members to committee mapping
-        for (uint256 i = 0; i < _members.length; i++) {
-            committee.isMember[_members[i]] = true;
-            memberCommittees[_members[i]][committeeId] = true;
-        }
-        
-        treasury -= _budget; // Allocate budget
-        
-        emit CommitteeCreated(committeeId, _name, _members);
-    }
-    
-    /**
-     * @dev Create a bounty
-     */
-    function createBounty(
-        string memory _title,
-        string memory _description,
-        uint256 _reward,
-        uint256 _deadline,
-        string[] memory _skills,
-        string[] memory _deliverables
-    ) external onlyActiveMember {
-        require(bytes(_title).length > 0, "Bounty title required");
-        require(_reward > 0, "Reward must be greater than 0");
-        require(_deadline > block.timestamp, "Deadline must be in the future");
-        require(treasury >= _reward, "Insufficient treasury funds");
-        
-        uint256 bountyId = bountyCount++;
-        
-        bounties[bountyId] = Bounty({
-            id: bountyId,
-            title: _title,
-            description: _description,
-            reward: _reward,
-            creator: msg.sender,
-            assignee: address(0),
-            deadline: _deadline,
-            completed: false,
-            paid: false,
-            skills: _skills,
-            status: BountyStatus.OPEN,
-            deliverables: _deliverables,
-            createdAt: block.timestamp
-        });
-        
-        treasury -= _reward; // Reserve reward
-        
-        emit BountyCreated(bountyId, _title, _reward, msg.sender);
-    }
-    
-    /**
-     * @dev Apply for a bounty
-     */
-    function applyForBounty(uint256 _bountyId, string memory _proposal) external onlyActiveMember bountyExists(_bountyId) {
-        Bounty storage bounty = bounties[_bountyId];
-        require(bounty.status == BountyStatus.OPEN, "Bounty not open for applications");
-        require(bounty.deadline > block.timestamp, "Bounty deadline passed");
-        
-        // In a full implementation, you'd store applications and let creator choose
-        // For simplicity, we'll auto-assign if no one is assigned
-        if (bounty.assignee == address(0)) {
-            bounty.assignee = msg.sender;
-            bounty.status = BountyStatus.ASSIGNED;
-            emit BountyAssigned(_bountyId, msg.sender);
-        }
-    }
-    
-    /**
-     * @dev Complete a bounty
-     */
-    function completeBounty(uint256 _bountyId, string memory _deliverableHash) external bountyExists(_bountyId) {
-        Bounty storage bounty = bounties[_bountyId];
-        require(bounty.assignee == msg.sender, "Only assignee can complete bounty");
-        require(bounty.status == BountyStatus.ASSIGNED || bounty.status == BountyStatus.IN_PROGRESS, "Invalid bounty status");
-        
-        bounty.completed = true;
-        bounty.status = BountyStatus.SUBMITTED;
-        
-        emit BountyCompleted(_bountyId, msg.sender);
-    }
-    
-    /**
-     * @dev Approve bounty completion and pay reward
-     */
-    function approveBountyCompletion(uint256 _bountyId) external bountyExists(_bountyId) {
-        Bounty storage bounty = bounties[_bountyId];
-        require(bounty.creator == msg.sender, "Only creator can approve completion");
-        require(bounty.status == BountyStatus.SUBMITTED, "Bounty not submitted for approval");
-        require(!bounty.paid, "Bounty already paid");
-        
-        bounty.paid = true;
-        bounty.status = BountyStatus.COMPLETED;
-        
-        // Pay reward
-        payable(bounty.assignee).transfer(bounty.reward);
-        
-        // Increase reputation for completion
-        memberReputation[bounty.assignee] += 50;
-        
-        emit BountyPaid(_bountyId, bounty.assignee, bounty.reward);
-        emit ReputationUpdated(bounty.assignee, memberReputation[bounty.assignee]);
-    }
-    
-    /**
-     * @dev Update member profile
-     */
-    function updateProfile(
+    function joinDAO(
         string memory _name,
         string memory _bio,
-        string memory _avatarHash,
         string[] memory _skills,
-        string[] memory _interests
-    ) external onlyMember {
-        MemberProfile storage profile = memberProfiles[msg.sender];
-        profile.name = _name;
-        profile.bio = _bio;
-        profile.avatarHash = _avatarHash;
-        profile.skills = _skills;
-        profile.interests = _interests;
-        profile.lastActivity = block.timestamp;
+        string[] memory _interests,
+        string memory _email
+    ) external payable {
+        require(!isMember[msg.sender], "Already a member");
+        require(msg.value >= membershipFee, "Insufficient membership fee");
+        require(bytes(_name).length > 0, "Name required");
         
-        emit MemberProfileUpdated(msg.sender);
+        isMember[msg.sender] = true;
+        memberSince[msg.sender] = block.timestamp;
+        votingPower[msg.sender] = 10; // Base voting power
+        memberCount++;
+        memberReputation[msg.sender] = 50; // Starting reputation
+        membershipTiers[msg.sender] = MembershipTier.BASIC;
+        memberVoteCredits[msg.sender] = 20; // Initial vote credits
+        proposalCooldown[msg.sender] = 1 days; // Initial cooldown
+        
+        memberProfiles[msg.sender] = MemberProfile({
+            name: _name,
+            bio: _bio,
+            avatarHash: "",
+            reputation: 50,
+            proposalsCreated: 0,
+            votesParticipated: 0,
+            isActive: true,
+            lastActivity: block.timestamp,
+            skills: _skills,
+            interests: _interests,
+            joinedAt: block.timestamp,
+            contributionScore: 0,
+            isBlacklisted: false,
+            email: _email,
+            discord: "",
+            twitter: ""
+        });
+        
+        treasury += msg.value;
+        
+        emit MemberAdded(msg.sender, votingPower[msg.sender]);
     }
     
     /**
-     * @dev Take a voting power snapshot
+     * @dev Stake tokens to earn rewards and increase voting power
      */
-    function takeSnapshot() external onlyAdmin returns (uint256) {
-        uint256 snapshotId = snapshotCount++;
-        VotingSnapshot storage snapshot = votingSnapshots[snapshotId];
-        snapshot.blockNumber = block.number;
-        snapshot.totalSupplyAtSnapshot = totalTokenSupply;
+    function stakeTokens(uint256 _amount, uint256 _lockPeriod) external onlyActiveMember {
+        require(_amount >= minimumStakeAmount, "Amount below minimum stake");
+        require(tokenBalance[msg.sender] >= _amount, "Insufficient token balance");
+        require(_lockPeriod >= 30 days && _lockPeriod <= 365 days, "Invalid lock period");
         
-        emit SnapshotTaken(snapshotId, block.number);
-        return snapshotId;
+        // Transfer tokens to stake
+        tokenBalance[msg.sender] -= _amount;
+        totalStakedTokens += _amount;
+        
+        // Calculate reward rate based on lock period
+        uint256 rewardMultiplier = _lockPeriod / 30 days; // Bonus for longer lock
+        uint256 rewardRate = stakingAPY + (rewardMultiplier * 50); // Extra 0.5% per month
+        
+        memberStakes[msg.sender] = Stake({
+            amount: _amount,
+            stakingTime: block.timestamp,
+            lockPeriod: _lockPeriod,
+            rewardRate: rewardRate,
+            isActive: true,
+            lastRewardClaim: block.timestamp
+        });
+        
+        // Increase voting power based on staked amount
+        votingPower[msg.sender] += _amount / (10**18); // 1 token = 1 voting power
+        
+        emit MemberStaked(msg.sender, _amount, _lockPeriod);
+        emit VotingPowerChanged(msg.sender, votingPower[msg.sender]);
     }
     
     /**
-     * @dev Veto a proposal (only for authorized addresses)
+     * @dev Claim staking rewards
      */
-    function vetoProposal(uint256 _proposalId, string memory _reason) external onlyVetoAuthority proposalExists(_proposalId) notExecuted(_proposalId) {
-        Proposal storage proposal = proposals[_proposalId];
-        require(!proposal.vetoed, "Proposal already vetoed");
-        require(block.timestamp <= proposal.deadline + vetoWindow, "Veto window expired");
+    function claimStakingRewards() external onlyActiveMember {
+        Stake storage stake = memberStakes[msg.sender];
+        require(stake.isActive, "No active stake");
         
-        proposal.vetoed = true;
-        proposal.vetoer = msg.sender;
+        uint256 timeSinceLastClaim = block.timestamp - stake.lastRewardClaim;
+        uint256 rewards = (stake.amount * stake.rewardRate * timeSinceLastClaim) / (365 days * 10000);
         
-        emit ProposalVetoed(_proposalId, msg.sender);
-    }
-    
-    /**
-     * @dev Execute proposal with enhanced checks
-     */
-    function executeProposal(uint256 _proposalId) 
-        external 
-        proposalExists(_proposalId) 
-        notExecuted(_proposalId) 
-    {
-        Proposal storage proposal = proposals[_proposalId];
-        require(block.timestamp > proposal.deadline, "Voting still active");
-        require(!proposal.vetoed, "Proposal has been vetoed");
-        require(block.timestamp >= proposal.deadline + proposal.executionDelay, "Execution delay not met");
+        require(stakingRewardPool >= rewards, "Insufficient reward pool");
         
-        uint256 totalVotes = proposal.yesVotes + proposal.noVotes + proposal.abstainVotes;
-        uint256 requiredQuorum = (getTotalVotingPower() * proposal.minQuorum) / 100;
+        stakingRewardPool -= rewards;
+        tokenBalance[msg.sender] += rewards;
+        totalTokenSupply += rewards;
+        stake.lastRewardClaim = block.timestamp;
         
-        require(totalVotes >= requiredQuorum, "Quorum not reached");
-        require(proposal.yesVotes > proposal.noVotes, "Proposal rejected");
-        
-        proposal.executed = true;
-        
-        // Execute the proposal
-        if (proposal.targetAddress != address(0) && proposal.value > 0) {
-            require(treasury >= proposal.value, "Insufficient treasury funds");
-            treasury -= proposal.value;
-            
-            (bool success, ) = proposal.targetAddress.call{value: proposal.value}(proposal.data);
-            require(success, "Proposal execution failed");
+        // Increase reputation for long-term staking
+        if (timeSinceLastClaim >= 30 days) {
+            memberReputation[msg.sender] += 10;
+            emit ReputationUpdated(msg.sender, memberReputation[msg.sender]);
         }
         
-        // Increase reputation for successful proposal
-        memberReputation[proposal.proposer] += 25;
-        
-        emit ProposalExecuted(_proposalId);
-        emit ReputationUpdated(proposal.proposer, memberReputation[proposal.proposer]);
+        emit RewardsClaimedFromStaking(msg.sender, rewards);
+        emit TokensIssued(msg.sender, rewards);
     }
     
     /**
-     * @dev Issue tokens to a member
+     * @dev Withdraw staked tokens (after lock period)
      */
-    function issueTokens(address _to, uint256 _amount) external onlyAdmin {
-        require(_to != address(0), "Invalid recipient");
-        require(_amount > 0, "Amount must be greater than 0");
+    function withdrawStake() external onlyActiveMember {
+        Stake storage stake = memberStakes[msg.sender];
+        require(stake.isActive, "No active stake");
+        require(block.timestamp >= stake.stakingTime + stake.lockPeriod, "Stake still locked");
         
-        tokenBalance[_to] += _amount;
-        totalTokenSupply += _amount;
+        uint256 stakeAmount = stake.amount;
         
-        emit TokensIssued(_to, _amount);
+        // Return staked tokens
+        tokenBalance[msg.sender] += stakeAmount;
+        totalStakedTokens -= stakeAmount;
+        
+        // Reduce voting power
+        votingPower[msg.sender] -= stakeAmount / (10**18);
+        
+        // Deactivate stake
+        stake.isActive = false;
+        
+        emit StakeWithdrawn(msg.sender, stakeAmount);
+        emit VotingPowerChanged(msg.sender, votingPower[msg.sender]);
     }
     
     /**
-     * @dev Burn tokens from a member
+     * @dev Create achievement
      */
-    function burnTokens(address _from, uint256 _amount) external onlyAdmin {
-        require(_from != address(0), "Invalid address");
-        require(tokenBalance[_from] >= _amount, "Insufficient balance");
+    function _createAchievement(string memory _title, string memory _description, uint256 _reputationReward) internal {
+        uint256 achievementId = achievementCount++;
+        Achievement storage achievement = achievements[achievementId];
+        achievement.title = _title;
+        achievement.description = _description;
+        achievement.reputationReward = _reputationReward;
+        achievement.isActive = true;
+    }
+    
+    /**
+     * @dev Award achievement to member
+     */
+    function awardAchievement(address _member, uint256 _achievementId) external onlyModerator {
+        require(_achievementId < achievementCount, "Achievement does not exist");
+        require(isMember[_member], "Not a member");
+        require(achievements[_achievementId].isActive, "Achievement not active");
+        require(!achievements[_achievementId].hasAchievement[_member], "Achievement already awarded");
         
-        tokenBalance[_from] -= _amount;
-        totalTokenSupply -= _amount;
+        Achievement storage achievement = achievements[_achievementId];
+        achievement.hasAchievement[_member] = true;
+        achievement.achievementDate[_member] = block.timestamp;
         
-        emit TokensBurned(_from, _amount);
-    }
-    
-    // View functions
-    function getVotingPower(address _member) public view returns (uint256) {
-        return votingPower[_member] + delegatedVotes[_member];
-    }
-    
-    function getTotalVotingPower() public view returns (uint256) {
-        return totalTokenSupply;
-    }
-    
-    function getProposalsByTag(string memory _tag) external view returns (uint256[] memory) {
-        return proposalsByTag[_tag];
-    }
-    
-    function getMemberProposals(address _member) external view returns (uint256[] memory) {
-        return memberProposals[_member];
-    }
-    
-    function getDelegators(address _delegate) external view returns (address[] memory) {
-        return delegators[_delegate];
-    }
-    
-    function getCommitteeMembers(uint256 _committeeId) external view committeeExists(_committeeId) returns (address[] memory) {
-        return committees[_committeeId].members;
-    }
-    
-    function getProposalDetails(uint256 _proposalId) external view proposalExists(_proposalId) returns (
-        Proposal memory proposal,
-        uint256 totalVotes,
-        uint256 requiredQuorum,
-        bool canExecute
-    ) {
-        proposal = proposals[_proposalId];
-        totalVotes = proposal.yesVotes + proposal.noVotes + proposal.abstainVotes;
-        requiredQuorum = (getTotalVotingPower() * proposal.minQuorum) / 100;
+        memberAchievements[_member].push(_achievementId);
+        memberReputation[_member] += achievement.reputationReward;
+        memberProfiles[_member].contributionScore += achievement.reputationReward / 5;
         
-        canExecute = !proposal.executed && 
-                    !proposal.vetoed && 
-                    block.timestamp > proposal.deadline &&
-                    block.timestamp >= proposal.deadline + proposal.executionDelay &&
-                    totalVotes >= requiredQuorum && 
-                    proposal.yesVotes > proposal.noVotes;
+        emit AchievementUnlocked(_member, _achievementId, achievement.title);
+        emit ReputationUpdated(_member, memberReputation[_member]);
     }
     
-    function getMemberStats(address _member) external view returns (
-        uint256 reputation,
-        uint256 proposalsCreated,
-        uint256 votesParticipated,
-        uint256 tokens,
-        uint256 votingPowerTotal,
-        bool isActive
-    ) {
-        MemberProfile memory profile = memberProfiles[_member];
-        return (
-            memberReputation[_member],
-            profile.proposalsCreated,
-            profile.votesParticipated,
-            tokenBalance[_member],
-            getVotingPower(_member),
-            profile.isActive                          ^
+    /**
+     * @dev Rate another member
+     */
+    function rateMember(address _member, uint256 _rating) external onlyActiveMember {
+        require(isMember[_member], "Member does not exist");
+        require(_member != msg.sender, "Cannot rate yourself");
+        require(_rating >= 1 && _rating <= 5, "Rating must be between 1 and 5");
+        require(memberRatings[msg.sender][_member] == 0, "Already rated this member");
+        
+        memberRatings[msg.sender][_member] = _rating;
+        totalRatingsReceived[_member]++;
+        
+        // Recalculate average rating
+        uint256 totalRating = 0;
+        uint256 ratingCount = 0;
+        
+        for (uint256 i = 0; i < memberCount; i++) {
+            // This is simplified - in production you'd iterate through actual raters
+            if (memberRatings[msg.sender][_member] > 0) {
+                totalRating += memberRatings[msg.sender][_member];
+                ratingCount++;
+            }
+        }
+        
+        if (ratingCount > 0) {
+            averageRating[_member] = totalRating / ratingCount;
+        }
+        
+        emit MemberRated(msg.sender, _member, _rating);
+    }
+    
+    /**
+     * @dev Verify a member (only by existing verified members)
+     */
+    function verifyMember(address _member) external onlyVerifiedMember {
+        require(isMember[_member], "Member does not exist");
+        require(!isVerifiedMember[_member], "Member already verified");
+        require(memberReputation[_member] >= 200, "Member needs more reputation");
+        
+        isVerifiedMember[_member] = true;
+        memberReputation[_member] += 100; // Bonus for verification
+        memberVoteCredits[_member] += 50; // Bonus vote credits
+        
+        emit MemberVerified(_member, msg.sender);
+        emit ReputationUpdated(_member, memberReputation[_member]);
+    }
+    
+    /**
+     * @dev Endorse a proposal
+     */
+    function endorseProposal(uint256 _proposalId) external onlyVerifiedMember proposalExists(_proposalId) votingActive(_proposalId) {
+        require(!hasEndorsed[_proposalId][msg.sender], "Already endorsed this proposal");
+        
+        hasEndorsed[_proposalId][msg.sender] = true;
+        proposalEndorsers[_proposalId].push(msg.sender);
+        
+        // Endorsements can influence proposal visibility and priority
+        proposalMetrics[_proposalId].engagementScore += 10;
+        
+        emit ProposalEndorsed(_proposalId, msg.sender);
+    }
+    
+    /**
+     * @dev Start discussion for a proposal
+     */
+    function startProposalDisc

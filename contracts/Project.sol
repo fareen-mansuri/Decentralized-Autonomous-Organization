@@ -1,4 +1,4 @@
-    // SPDX-License-Identifier: MIT
+  // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
 /**
@@ -37,6 +37,16 @@ contract EnhancedDAO {
         uint256 priorityScore;
         bool requiresKYC;
         uint256 minimumParticipation;
+        // New proposal fields
+        uint256 sentimentScore;
+        mapping(address => uint256) memberEngagement;
+        bool requiresAudit;
+        address auditor;
+        bool auditPassed;
+        uint256 estimatedImpact;
+        string[] dependencies;
+        uint256 carbonFootprint;
+        bool isUrgent;
     }
     
     // Struct for member profile
@@ -67,6 +77,16 @@ contract EnhancedDAO {
         uint256 lastStreakUpdate;
         mapping(string => uint256) skillEndorsements;
         uint256 mentorshipScore;
+        // New member fields
+        uint256 innovationIndex;
+        mapping(string => uint256) badgeCount;
+        uint256 communityRanking;
+        uint256 collaborationScore;
+        bool isInfluencer;
+        uint256 followerCount;
+        string[] achievements;
+        uint256 learningCredits;
+        mapping(address => bool) trustedConnections;
     }
     
     // Struct for committees
@@ -89,6 +109,13 @@ contract EnhancedDAO {
         bool requiresElection;
         uint256 termLength;
         uint256 termEndDate;
+        // New committee fields
+        uint256 efficiency;
+        mapping(string => uint256) specializations;
+        bool isPublic;
+        uint256 maxMembers;
+        string[] workingGroups;
+        mapping(address => uint256) memberRatings;
     }
     
     // Struct for bounties
@@ -118,148 +145,175 @@ contract EnhancedDAO {
         uint256 difficultyLevel;
         mapping(address => uint256) bidAmounts;
         bool allowsBidding;
+        // New bounty fields
+        uint256 qualityScore;
+        mapping(address => uint256) workerPerformance;
+        bool requiresTeam;
+        uint256 maxTeamSize;
+        address[] team;
+        uint256 urgencyLevel;
+        string[] mentorshipOffered;
     }
     
-    // Struct for milestones in bounties
-    struct Milestone {
-        string description;
-        uint256 reward;
-        bool completed;
-        uint256 dueDate;
-        address reviewer;
-        bool approved;
-    }
-    
-    // Struct for treasury proposals
-    struct TreasuryProposal {
-        uint256 id;
-        address recipient;
-        uint256 amount;
-        string reason;
-        uint256 votes;
-        mapping(address => bool) hasVoted;
-        bool executed;
-        uint256 deadline;
-        ProposalCategory category;
-        bool isRecurring;
-        uint256 recurringInterval;
-        uint256 nextExecution;
-        uint256 budgetAllocation;
-        bool requiresMultiSig;
-        uint256 riskLevel;
-        address[] approvers;
-        mapping(address => bool) hasApproved;
-        uint256 requiredApprovals;
-    }
-    
-    // Struct for decentralized identity and reputation system
-    struct Identity {
-        bytes32 identityHash;
-        bool isVerified;
-        address verifier;
-        uint256 verificationDate;
-        string[] documents; // IPFS hashes
-        uint256 trustScore;
-        mapping(address => bool) trustedBy;
-        uint256 trustedByCount;
-        bool isKYCCompleted;
-        string jurisdiction;
-        uint256 complianceScore;
-    }
-    
-    // Struct for governance tokens with different classes
-    struct TokenClass {
+    // New struct for NFT rewards and achievements
+    struct NFTReward {
+        uint256 tokenId;
         string name;
-        uint256 totalSupply;
-        uint256 votingWeight;
-        uint256 dividendRate;
-        bool transferable;
+        string description;
+        string metadataURI;
+        address recipient;
+        uint256 mintedAt;
+        AchievementType achievementType;
+        uint256 rarity; // 1-5 scale
+        bool isTransferable;
+        uint256 bonusReputation;
+        mapping(address => bool) hasApproved; // For rare NFTs requiring approval
+    }
+    
+    // Struct for DAO events and activities
+    struct DAOEvent {
+        uint256 id;
+        string title;
+        string description;
+        uint256 startTime;
+        uint256 endTime;
+        address organizer;
+        string location; // Can be virtual
+        uint256 maxAttendees;
+        uint256 currentAttendees;
+        mapping(address => bool) attendees;
+        EventType eventType;
+        uint256 cost;
+        bool requiresRSVP;
+        string[] speakers;
+        mapping(address => string) feedback;
+        uint256 avgRating;
+        bool isRecurring;
+        uint256 seriesId;
+    }
+    
+    // Struct for liquidity mining and staking
+    struct StakingPool {
+        uint256 id;
+        string name;
+        uint256 totalStaked;
+        uint256 rewardRate; // per block
         uint256 lockupPeriod;
-        mapping(address => uint256) balances;
-        mapping(address => uint256) lockupEndTime;
-    }
-    
-    // Struct for decentralized dispute resolution
-    struct Dispute {
-        uint256 id;
-        address plaintiff;
-        address defendant;
-        string description;
-        uint256 stake;
-        address[] arbitrators;
-        mapping(address => DisputeVote) arbitratorVotes;
-        uint256 votingDeadline;
-        bool resolved;
-        address winner;
-        uint256 compensation;
-        DisputeCategory category;
-        string evidence; // IPFS hash
-        uint256 createdAt;
-    }
-    
-    struct DisputeVote {
-        address winner;
-        string reasoning;
-        uint256 timestamp;
-        bool hasVoted;
-    }
-    
-    // Struct for governance research and analytics
-    struct GovernanceMetrics {
-        uint256 totalProposals;
-        uint256 averageVotingParticipation;
-        uint256 averageProposalDuration;
-        uint256 memberGrowthRate;
-        uint256 treasuryGrowthRate;
-        uint256 activityScore;
-        mapping(ProposalType => uint256) proposalSuccessRates;
-        mapping(address => uint256) memberActivityScores;
-        uint256 lastUpdateTimestamp;
-    }
-    
-    // Struct for automated proposal execution
-    struct AutomatedAction {
-        uint256 id;
-        string description;
-        bytes callData;
-        address targetContract;
-        uint256 executeAt;
-        bool executed;
-        bool cancelled;
-        uint256 gasLimit;
-        address creator;
-        bool requiresConfirmation;
-        uint256 confirmationCount;
-        mapping(address => bool) hasConfirmed;
-    }
-    
-    // Struct for cross-chain governance
-    struct CrossChainProposal {
-        uint256 localProposalId;
-        uint256[] chainIds;
-        mapping(uint256 => bytes32) chainProposalHashes;
-        mapping(uint256 => bool) chainExecutionStatus;
-        bool isMultiChain;
-        address relayerContract;
-        uint256 crossChainFee;
-    }
-    
-    // Struct for DAO partnerships and alliances
-    struct Partnership {
-        uint256 id;
-        address partnerDAO;
-        string description;
-        uint256 establishedAt;
+        mapping(address => uint256) userStakes;
+        mapping(address => uint256) userRewards;
+        mapping(address => uint256) stakeTimestamp;
         bool isActive;
-        uint256 sharedBudget;
-        uint256 votingWeight;
-        mapping(uint256 => bool) jointProposals;
-        address[] liaisons;
-        string[] collaborationAreas;
-        uint256 performanceScore;
+        uint256 minStake;
+        uint256 maxStake;
+        StakeType stakeType;
+        uint256 poolStartTime;
+        uint256 poolEndTime;
     }
     
-    // New enums
+    // Struct for governance proposals analysis and prediction
+    struct ProposalAnalytics {
+        uint256 proposalId;
+        uint256 predictedOutcome; // 0-100 probability of passing
+        uint256 stakeholderSentiment;
+        mapping(string => uint256) topicRelevance;
+        uint256 economicImpact;
+        uint256 riskAssessment;
+        string[] similarProposals;
+        mapping(address => uint256) influencerSupport;
+        uint256 timeToDecision;
+        bool hasControversy;
+    }
+    
+    // Struct for cross-DAO collaboration
+    struct InterDAOCollaboration {
+        uint256 id;
+        address[] participatingDAOs;
+        string objective;
+        uint256 sharedBudget;
+        mapping(address => uint256) contributions;
+        uint256 startTime;
+        uint256 endTime;
+        bool isActive;
+        mapping(address => bool) hasApproved;
+        string[] deliverables;
+        address coordinator;
+        uint256 successMetrics;
+    }
+    
+    // Struct for governance education and onboarding
+    struct EducationModule {
+        uint256 id;
+        string title;
+        string content; // IPFS hash
+        uint256 difficulty; // 1-5
+        uint256 estimatedTime; // in minutes
+        string[] prerequisites;
+        uint256 rewardCredits;
+        mapping(address => bool) completed;
+        mapping(address => uint256) scores;
+        address instructor;
+        bool isActive;
+        string[] tags;
+        uint256 completionCount;
+    }
+    
+    // Struct for proposal templates and automation
+    struct ProposalTemplate {
+        uint256 id;
+        string name;
+        string description;
+        ProposalType category;
+        string[] requiredFields;
+        uint256 defaultVotingPeriod;
+        uint256 defaultQuorum;
+        bool requiresDeposit;
+        uint256 depositAmount;
+        address creator;
+        uint256 usageCount;
+        bool isPublic;
+        mapping(address => bool) canUse;
+    }
+    
+    // Enhanced enums
+    enum AchievementType {
+        FIRST_PROPOSAL,
+        ACTIVE_VOTER,
+        COMMITTEE_LEADER,
+        BOUNTY_HUNTER,
+        MENTOR,
+        INNOVATOR,
+        COMMUNITY_BUILDER,
+        LONG_TIME_MEMBER,
+        HIGH_REPUTATION,
+        EDUCATOR,
+        COLLABORATOR,
+        EARLY_ADOPTER
+    }
+    
+    enum EventType {
+        GOVERNANCE_MEETING,
+        EDUCATIONAL_WORKSHOP,
+        NETWORKING,
+        HACKATHON,
+        CONFERENCE,
+        SOCIAL,
+        STRATEGIC_PLANNING,
+        ONBOARDING,
+        VOTING_SESSION,
+        CELEBRATION
+    }
+    
+    enum StakeType {
+        GOVERNANCE,
+        LIQUIDITY_PROVISION,
+        VALIDATOR,
+        INSURANCE,
+        DEVELOPMENT_FUND,
+        MARKETING_FUND,
+        EMERGENCY_FUND
+    }
+    
+    // Existing enums (keeping all previous ones)
     enum DisputeCategory {
         CONTRACT_BREACH,
         GOVERNANCE_VIOLATION,
@@ -280,7 +334,6 @@ contract EnhancedDAO {
         AMBASSADOR
     }
     
-    // Existing enums (keeping all previous ones)
     enum ProposalType {
         GENERAL,
         TREASURY,
@@ -341,47 +394,74 @@ contract EnhancedDAO {
         LIFETIME
     }
     
-    // Additional state variables
-    mapping(address => Identity) public memberIdentities;
-    mapping(uint256 => TokenClass) public tokenClasses;
-    mapping(uint256 => Dispute) public disputes;
-    mapping(uint256 => AutomatedAction) public automatedActions;
-    mapping(uint256 => CrossChainProposal) public crossChainProposals;
-    mapping(uint256 => Partnership) public partnerships;
-    mapping(address => MemberRole[]) public memberRoles;
-    mapping(address => mapping(string => uint256)) public memberSkillLevels;
-    mapping(address => uint256) public memberMentorshipCount;
-    mapping(address => address[]) public memberMentees;
-    mapping(uint256 => uint256) public proposalFunding;
-    mapping(address => uint256) public liquidityProvided;
-    mapping(address => uint256) public liquidityRewards;
-    mapping(string => uint256) public skillDemand;
-    mapping(address => bool) public isAccreditedInvestor;
-    mapping(address => uint256) public investmentLimit;
-    mapping(uint256 => mapping(address => uint256)) public proposalStaking;
-    mapping(address => uint256) public totalProposalStake;
+    // State variables for new functionality
+    mapping(uint256 => NFTReward) public nftRewards;
+    mapping(uint256 => DAOEvent) public daoEvents;
+    mapping(uint256 => StakingPool) public stakingPools;
+    mapping(uint256 => ProposalAnalytics) public proposalAnalytics;
+    mapping(uint256 => InterDAOCollaboration) public interDAOCollaborations;
+    mapping(uint256 => EducationModule) public educationModules;
+    mapping(uint256 => ProposalTemplate) public proposalTemplates;
     
-    // Governance analytics
-    GovernanceMetrics public governanceMetrics;
+    mapping(address => uint256[]) public memberNFTs;
+    mapping(address => uint256) public memberLearningCredits;
+    mapping(address => uint256[]) public memberEducationCompleted;
+    mapping(address => mapping(uint256 => uint256)) public stakingRewards;
+    mapping(address => uint256) public totalStakedByMember;
+    mapping(string => uint256) public skillMarketDemand;
+    mapping(address => bool) public isInfluencer;
+    mapping(address => uint256) public influencerFollowers;
+    mapping(address => string[]) public memberBadges;
+    mapping(uint256 => address[]) public eventAttendees;
+    mapping(address => uint256) public memberEventCount;
+    mapping(address => mapping(string => uint256)) public skillCertifications;
     
-    // Advanced state variables
-    uint256 public disputeCount;
-    uint256 public automatedActionCount;
-    uint256 public partnershipCount;
-    uint256 public tokenClassCount;
-    uint256 public crossChainProposalCount;
-    uint256 public totalLiquidityPool;
-    uint256 public governanceInsurancePool;
-    uint256 public educationFund;
-    uint256 public innovationGrants;
-    uint256 public sustainabilityScore;
-    uint256 public decentralizationIndex;
+    // New counters
+    uint256 public nftRewardCount;
+    uint256 public daoEventCount;
+    uint256 public stakingPoolCount;
+    uint256 public interDAOCollaborationCount;
+    uint256 public educationModuleCount;
+    uint256 public proposalTemplateCount;
     
-    // Oracles and external data feeds
-    mapping(string => address) public dataOracles;
-    mapping(string => uint256) public oracleData;
+    // Enhanced governance parameters
+    struct GovernanceParams {
+        uint256 votingPeriod;
+        uint256 quorum;
+        uint256 minProposalStake;
+        uint256 proposalExecutionDelay;
+        uint256 reputationThreshold;
+        uint256 maxVotingPeriod;
+        uint256 minVotingPeriod;
+        uint256 vetoWindow;
+        // New parameters
+        uint256 nftRewardThreshold;
+        uint256 stakingRewardRate;
+        uint256 learningCreditRate;
+        uint256 influencerThreshold;
+        uint256 collaborationBonus;
+        uint256 innovationIncentive;
+        uint256 sustainabilityWeight;
+        uint256 diversityBonus;
+    }
     
-    // Existing state variables (keeping all previous ones)
+    // Events for new functionality
+    event NFTRewardMinted(uint256 indexed tokenId, address indexed recipient, AchievementType achievementType);
+    event DAOEventCreated(uint256 indexed eventId, address indexed organizer, string title);
+    event EventAttendanceMarked(uint256 indexed eventId, address indexed attendee);
+    event StakingPoolCreated(uint256 indexed poolId, string name, uint256 rewardRate);
+    event TokensStaked(address indexed user, uint256 indexed poolId, uint256 amount);
+    event RewardsClaimed(address indexed user, uint256 indexed poolId, uint256 amount);
+    event EducationModuleCompleted(address indexed member, uint256 indexed moduleId, uint256 score);
+    event SkillCertified(address indexed member, string skill, uint256 level);
+    event InterDAOCollaborationStarted(uint256 indexed collaborationId, address[] participatingDAOs);
+    event ProposalTemplateCreated(uint256 indexed templateId, string name, address creator);
+    event BadgeAwarded(address indexed member, string badge);
+    event LearningCreditsEarned(address indexed member, uint256 credits);
+    event InfluencerStatusChanged(address indexed member, bool isInfluencer);
+    event ProposalAnalyticsUpdated(uint256 indexed proposalId, uint256 predictedOutcome);
+    
+    // Existing state variables and mappings (keep all previous ones)
     mapping(uint256 => Proposal) public proposals;
     mapping(uint256 => mapping(address => bool)) public hasVoted;
     mapping(uint256 => mapping(address => VoteOption)) public memberVote;
@@ -389,76 +469,41 @@ contract EnhancedDAO {
     mapping(address => uint256) public memberSince;
     mapping(address => uint256) public votingPower;
     mapping(address => MemberProfile) public memberProfiles;
-    mapping(uint256 => Committee) public committees;
-    mapping(uint256 => Bounty) public bounties;
-    mapping(uint256 => TreasuryProposal) public treasuryProposals;
-    // ... [keeping all other existing mappings]
+    mapping(address => uint256) public memberReputation;
+    mapping(address => MembershipTier) public membershipTiers;
+    mapping(address => bool) public isVerifiedMember;
+    mapping(address => bool) public isModerator;
+    mapping(address => uint256) public moderatorSince;
+    mapping(address => uint256) public memberVoteCredits;
     
     uint256 public proposalCount;
     uint256 public memberCount;
-    uint256 public committeeCount;
-    uint256 public bountyCount;
-    uint256 public treasuryProposalCount;
-    // ... [keeping all other existing state variables]
-    
+    uint256 public treasury;
     address public admin;
     GovernanceParams public governanceParams;
-    uint256 public treasury;
-    // ... [keeping all other existing variables]
     
-    // New events for additional functionality
-    event IdentityVerified(address indexed member, bytes32 identityHash, address indexed verifier);
-    event DisputeCreated(uint256 indexed disputeId, address indexed plaintiff, address indexed defendant);
-    event DisputeResolved(uint256 indexed disputeId, address indexed winner, uint256 compensation);
-    event AutomatedActionScheduled(uint256 indexed actionId, uint256 executeAt);
-    event AutomatedActionExecuted(uint256 indexed actionId, bool success);
-    event CrossChainProposalCreated(uint256 indexed proposalId, uint256[] chainIds);
-    event PartnershipEstablished(uint256 indexed partnershipId, address indexed partnerDAO);
-    event SkillEndorsed(address indexed member, string skill, address indexed endorser);
-    event MentorshipStarted(address indexed mentor, address indexed mentee);
-    event LiquidityProvided(address indexed provider, uint256 amount, uint256 rewards);
-    event ProposalFunded(uint256 indexed proposalId, address indexed funder, uint256 amount);
-    event MilestoneCompleted(uint256 indexed bountyId, uint256 milestoneId, address indexed assignee);
-    event TokenClassCreated(uint256 indexed classId, string name, uint256 votingWeight);
-    event GovernanceMetricsUpdated(uint256 timestamp, uint256 activityScore);
-    event OracleUpdated(string indexed dataType, uint256 newValue);
-    event ComplianceCheckCompleted(address indexed member, bool passed);
-    event RiskAssessmentCompleted(uint256 indexed proposalId, uint256 riskLevel);
-    event EducationModuleCompleted(address indexed member, string module);
-    event InnovationGrantAwarded(address indexed recipient, uint256 amount, string project);
-    
-    // Advanced modifiers
-    modifier onlyArbitrator() {
-        require(hasRole(msg.sender, MemberRole.ARBITRATOR), "Only arbitrators can perform this action");
+    // Modifiers for new functionality
+    modifier hasLearningCredits(uint256 _requiredCredits) {
+        require(memberLearningCredits[msg.sender] >= _requiredCredits, "Insufficient learning credits");
         _;
     }
     
-    modifier onlyMentor() {
-        require(hasRole(msg.sender, MemberRole.MENTOR), "Only mentors can perform this action");
+    modifier onlyInfluencer() {
+        require(isInfluencer[msg.sender], "Only influencers can perform this action");
         _;
     }
     
-    modifier hasKYC() {
-        require(memberIdentities[msg.sender].isKYCCompleted, "KYC verification required");
+    modifier eventExists(uint256 _eventId) {
+        require(_eventId < daoEventCount, "Event does not exist");
         _;
     }
     
-    modifier validTrustScore(uint256 _minScore) {
-        require(memberIdentities[msg.sender].trustScore >= _minScore, "Insufficient trust score");
+    modifier stakingPoolExists(uint256 _poolId) {
+        require(_poolId < stakingPoolCount, "Staking pool does not exist");
         _;
     }
     
-    modifier onlyAccreditedInvestor() {
-        require(isAccreditedInvestor[msg.sender], "Only accredited investors allowed");
-        _;
-    }
-    
-    modifier withinInvestmentLimit(uint256 _amount) {
-        require(_amount <= investmentLimit[msg.sender], "Exceeds investment limit");
-        _;
-    }
-    
-    // Keep all existing modifiers...
+    // Keep existing modifiers
     modifier onlyMember() {
         require(isMember[msg.sender], "Only members can perform this action");
         _;
@@ -469,49 +514,49 @@ contract EnhancedDAO {
         _;
     }
     
-    // ... [all other existing modifiers]
+    modifier onlyModerator() {
+        require(isModerator[msg.sender], "Only moderators can perform this action");
+        _;
+    }
     
-    // Constructor (enhanced)
+    modifier hasReputation(uint256 _minReputation) {
+        require(memberReputation[msg.sender] >= _minReputation, "Insufficient reputation");
+        _;
+    }
+    
+    modifier onlyActiveMember() {
+        require(isMember[msg.sender] && memberProfiles[msg.sender].isActive, "Only active members allowed");
+        _;
+    }
+    
+    modifier onlyVerifiedMember() {
+        require(isVerifiedMember[msg.sender], "Only verified members allowed");
+        _;
+    }
+    
+    modifier proposalExists(uint256 _proposalId) {
+        require(proposals[_proposalId].exists, "Proposal does not exist");
+        _;
+    }
+    
+    // Constructor (enhanced with new features)
     constructor() {
         admin = msg.sender;
         isMember[msg.sender] = true;
         memberSince[msg.sender] = block.timestamp;
         votingPower[msg.sender] = 100;
         memberCount = 1;
-        memberReputation[msg.sender] = 500;
+        memberReputation[msg.sender] = 1000;
         membershipTiers[msg.sender] = MembershipTier.FOUNDER;
         isVerifiedMember[msg.sender] = true;
         isModerator[msg.sender] = true;
         moderatorSince[msg.sender] = block.timestamp;
         memberVoteCredits[msg.sender] = 100;
-        isAccreditedInvestor[msg.sender] = true;
-        investmentLimit[msg.sender] = 1000 ether;
+        memberLearningCredits[msg.sender] = 100;
+        isInfluencer[msg.sender] = true;
+        influencerFollowers[msg.sender] = 1000;
         
-        // Initialize token classes
-        _createTokenClass("Governance", 1000000, 100, 0, true, 0);
-        _createTokenClass("Utility", 5000000, 50, 0, true, 0);
-        _createTokenClass("Premium", 100000, 200, 500, false, 365 days);
-        
-        // Initialize identity
-        memberIdentities[msg.sender] = Identity({
-            identityHash: keccak256(abi.encodePacked(msg.sender, block.timestamp)),
-            isVerified: true,
-            verifier: msg.sender,
-            verificationDate: block.timestamp,
-            documents: new string[](0),
-            trustScore: 1000,
-            trustedByCount: 0,
-            isKYCCompleted: true,
-            jurisdiction: "GLOBAL",
-            complianceScore: 100
-        });
-        
-        // Add roles to admin
-        memberRoles[msg.sender].push(MemberRole.ADMIN);
-        memberRoles[msg.sender].push(MemberRole.EMERGENCY_COUNCIL);
-        memberRoles[msg.sender].push(MemberRole.ARBITRATOR);
-        
-        // Initialize governance parameters (enhanced)
+        // Initialize governance parameters with new fields
         governanceParams = GovernanceParams({
             votingPeriod: 7 days,
             quorum: 51,
@@ -520,315 +565,1123 @@ contract EnhancedDAO {
             reputationThreshold: 100,
             maxVotingPeriod: 30 days,
             minVotingPeriod: 1 days,
-            vetoWindow: 3 days
+            vetoWindow: 3 days,
+            nftRewardThreshold: 500,
+            stakingRewardRate: 100, // 1% per day
+            learningCreditRate: 10,
+            influencerThreshold: 500,
+            collaborationBonus: 50,
+            innovationIncentive: 100,
+            sustainabilityWeight: 25,
+            diversityBonus: 30
         });
         
-        // Initialize pools
-        governanceInsurancePool = 10 ether;
-        educationFund = 5 ether;
-        innovationGrants = 15 ether;
-        sustainabilityScore = 75;
-        decentralizationIndex = 80;
+        // Create initial education modules
+        _createEducationModule(
+            "DAO Governance Fundamentals",
+            "QmEducationContent1",
+            1,
+            30,
+            new string[](0),
+            25
+        );
+        
+        // Create initial staking pool
+        _createStakingPool(
+            "Governance Staking",
+            100, // 1% reward rate
+            30 days,
+            0.1 ether,
+            10 ether,
+            StakeType.GOVERNANCE
+        );
+        
+        // Award founder NFT
+        _mintNFTReward(msg.sender, AchievementType.EARLY_ADOPTER, 5);
     }
     
     /**
-     * @dev Advanced KYC and identity verification
+     * @dev Create a new DAO event
      */
-    function completeKYCVerification(
-        address _member,
-        bytes32 _identityHash,
-        string[] memory _documents,
-        string memory _jurisdiction
-    ) external onlyModerator {
-        require(isMember[_member], "Member does not exist");
+    function createDAOEvent(
+        string memory _title,
+        string memory _description,
+        uint256 _startTime,
+        uint256 _endTime,
+        string memory _location,
+        uint256 _maxAttendees,
+        EventType _eventType,
+        uint256 _cost,
+        bool _requiresRSVP,
+        string[] memory _speakers
+    ) external onlyMember hasReputation(100) {
+        require(_startTime > block.timestamp, "Event must be in the future");
+        require(_endTime > _startTime, "End time must be after start time");
         
-        Identity storage identity = memberIdentities[_member];
-        identity.identityHash = _identityHash;
-        identity.isVerified = true;
-        identity.verifier = msg.sender;
-        identity.verificationDate = block.timestamp;
-        identity.documents = _documents;
-        identity.isKYCCompleted = true;
-        identity.jurisdiction = _jurisdiction;
-        identity.complianceScore = 85; // Initial compliance score
-        identity.trustScore += 200; // Bonus for KYC completion
+        uint256 eventId = daoEventCount++;
+        DAOEvent storage newEvent = daoEvents[eventId];
+        newEvent.id = eventId;
+        newEvent.title = _title;
+        newEvent.description = _description;
+        newEvent.startTime = _startTime;
+        newEvent.endTime = _endTime;
+        newEvent.organizer = msg.sender;
+        newEvent.location = _location;
+        newEvent.maxAttendees = _maxAttendees;
+        newEvent.eventType = _eventType;
+        newEvent.cost = _cost;
+        newEvent.requiresRSVP = _requiresRSVP;
+        newEvent.speakers = _speakers;
         
-        // Unlock additional features for KYC-verified members
-        memberVoteCredits[_member] += 30;
-        votingPower[_member] += 20;
+        // Award reputation bonus for organizing events
+        memberReputation[msg.sender] += 25;
+        memberProfiles[msg.sender].contributionScore += 15;
         
-        emit IdentityVerified(_member, _identityHash, msg.sender);
-        emit VotingPowerChanged(_member, votingPower[_member]);
+        emit DAOEventCreated(eventId, msg.sender, _title);
     }
     
     /**
-     * @dev Create a new token class with specific properties
+     * @dev RSVP or attend a DAO event
      */
-    function _createTokenClass(
+    function attendEvent(uint256 _eventId) external payable eventExists(_eventId) onlyMember {
+        DAOEvent storage eventData = daoEvents[_eventId];
+        require(block.timestamp <= eventData.endTime, "Event has ended");
+        require(!eventData.attendees[msg.sender], "Already registered");
+        require(eventData.currentAttendees < eventData.maxAttendees, "Event is full");
+        
+        if (eventData.cost > 0) {
+            require(msg.value >= eventData.cost, "Insufficient payment");
+        }
+        
+        eventData.attendees[msg.sender] = true;
+        eventData.currentAttendees++;
+        eventAttendees[_eventId].push(msg.sender);
+        memberEventCount[msg.sender]++;
+        
+        // Award attendance benefits
+        memberReputation[msg.sender] += 5;
+        memberLearningCredits[msg.sender] += 2;
+        
+        // Special rewards for educational events
+        if (eventData.eventType == EventType.EDUCATIONAL_WORKSHOP) {
+            memberLearningCredits[msg.sender] += 5;
+        }
+        
+        emit EventAttendanceMarked(_eventId, msg.sender);
+        
+        // Check for community builder achievement
+        if (memberEventCount[msg.sender] >= 10) {
+            _mintNFTReward(msg.sender, AchievementType.COMMUNITY_BUILDER, 3);
+        }
+    }
+    
+    /**
+     * @dev Create a new staking pool
+     */
+    function _createStakingPool(
         string memory _name,
-        uint256 _totalSupply,
-        uint256 _votingWeight,
-        uint256 _dividendRate,
-        bool _transferable,
-        uint256 _lockupPeriod
+        uint256 _rewardRate,
+        uint256 _lockupPeriod,
+        uint256 _minStake,
+        uint256 _maxStake,
+        StakeType _stakeType
     ) internal returns (uint256) {
-        uint256 classId = tokenClassCount++;
-        TokenClass storage tokenClass = tokenClasses[classId];
-        tokenClass.name = _name;
-        tokenClass.totalSupply = _totalSupply;
-        tokenClass.votingWeight = _votingWeight;
-        tokenClass.dividendRate = _dividendRate;
-        tokenClass.transferable = _transferable;
-        tokenClass.lockupPeriod = _lockupPeriod;
+        uint256 poolId = stakingPoolCount++;
+        StakingPool storage pool = stakingPools[poolId];
+        pool.id = poolId;
+        pool.name = _name;
+        pool.rewardRate = _rewardRate;
+        pool.lockupPeriod = _lockupPeriod;
+        pool.minStake = _minStake;
+        pool.maxStake = _maxStake;
+        pool.stakeType = _stakeType;
+        pool.isActive = true;
+        pool.poolStartTime = block.timestamp;
+        pool.poolEndTime = block.timestamp + 365 days; // Default 1 year
         
-        // Give initial supply to admin
-        tokenClass.balances[admin] = _totalSupply;
-        if (_lockupPeriod > 0) {
-            tokenClass.lockupEndTime[admin] = block.timestamp + _lockupPeriod;
-        }
-        
-        emit TokenClassCreated(classId, _name, _votingWeight);
-        return classId;
+        emit StakingPoolCreated(poolId, _name, _rewardRate);
+        return poolId;
     }
     
     /**
-     * @dev Create a dispute for resolution
+     * @dev Stake tokens in a specific pool
      */
-    function createDispute(
-        address _defendant,
-        string memory _description,
-        DisputeCategory _category,
-        string memory _evidence
-    ) external payable onlyActiveMember {
-        require(msg.value >= 0.1 ether, "Insufficient dispute stake");
-        require(_defendant != msg.sender, "Cannot dispute against yourself");
-        require(isMember[_defendant], "Defendant must be a member");
+    function stakeTokens(uint256 _poolId, uint256 _amount) external payable stakingPoolExists(_poolId) onlyMember {
+        StakingPool storage pool = stakingPools[_poolId];
+        require(pool.isActive, "Pool is not active");
+        require(block.timestamp >= pool.poolStartTime && block.timestamp <= pool.poolEndTime, "Pool not available");
+        require(_amount >= pool.minStake, "Below minimum stake");
+        require(_amount <= pool.maxStake, "Exceeds maximum stake");
+        require(msg.value >= _amount, "Insufficient funds sent");
         
-        uint256 disputeId = disputeCount++;
-        Dispute storage dispute = disputes[disputeId];
-        dispute.id = disputeId;
-        dispute.plaintiff = msg.sender;
-        dispute.defendant = _defendant;
-        dispute.description = _description;
-        dispute.stake = msg.value;
-        dispute.category = _category;
-        dispute.evidence = _evidence;
-        dispute.votingDeadline = block.timestamp + 7 days;
-        dispute.createdAt = block.timestamp;
+        // Calculate existing rewards before updating stake
+        _updateStakingRewards(msg.sender, _poolId);
         
-        // Assign random arbitrators with ARBITRATOR role
-        _assignArbitrators(disputeId);
+        pool.userStakes[msg.sender] += _amount;
+        pool.totalStaked += _amount;
+        pool.stakeTimestamp[msg.sender] = block.timestamp;
+        totalStakedByMember[msg.sender] += _amount;
         
-        emit DisputeCreated(disputeId, msg.sender, _defendant);
-    }
-    
-    /**
-     * @dev Assign arbitrators to a dispute
-     */
-    function _assignArbitrators(uint256 _disputeId) internal {
-        // Simplified arbitrator assignment - in production, use randomness
-        Dispute storage dispute = disputes[_disputeId];
+        // Reputation bonus for staking
+        memberReputation[msg.sender] += _amount / 0.1 ether; // 1 reputation per 0.1 ETH
         
-        // For now, assign admin as arbitrator
-        if (hasRole(admin, MemberRole.ARBITRATOR)) {
-            dispute.arbitrators.push(admin);
+        emit TokensStaked(msg.sender, _poolId, _amount);
+        
+        // Check for validator achievement
+        if (totalStakedByMember[msg.sender] >= 10 ether) {
+            _mintNFTReward(msg.sender, AchievementType.HIGH_REPUTATION, 4);
         }
     }
     
     /**
-     * @dev Vote on a dispute resolution (arbitrators only)
+     * @dev Update staking rewards for a user
      */
-    function voteOnDispute(
-        uint256 _disputeId,
-        address _winner,
-        string memory _reasoning
-    ) external onlyArbitrator {
-        Dispute storage dispute = disputes[_disputeId];
-        require(block.timestamp <= dispute.votingDeadline, "Voting period ended");
-        require(!dispute.resolved, "Dispute already resolved");
-        require(_winner == dispute.plaintiff || _winner == dispute.defendant, "Invalid winner");
-        
-        // Check if caller is assigned arbitrator
-        bool isAssignedArbitrator = false;
-        for (uint256 i = 0; i < dispute.arbitrators.length; i++) {
-            if (dispute.arbitrators[i] == msg.sender) {
-                isAssignedArbitrator = true;
-                break;
-            }
+    function _updateStakingRewards(address _user, uint256 _poolId) internal {
+        StakingPool storage pool = stakingPools[_poolId];
+        if (pool.userStakes[_user] > 0) {
+            uint256 stakeDuration = block.timestamp - pool.stakeTimestamp[_user];
+            uint256 reward = (pool.userStakes[_user] * pool.rewardRate * stakeDuration) / (100 * 1 days);
+            stakingRewards[_user][_poolId] += reward;
         }
-        require(isAssignedArbitrator, "Not assigned to this dispute");
-        require(!dispute.arbitratorVotes[msg.sender].hasVoted, "Already voted");
+    }
+    
+    /**
+     * @dev Claim staking rewards
+     */
+    function claimStakingRewards(uint256 _poolId) external stakingPoolExists(_poolId) onlyMember {
+        _updateStakingRewards(msg.sender, _poolId);
+        uint256 reward = stakingRewards[msg.sender][_poolId];
+        require(reward > 0, "No rewards to claim");
         
-        dispute.arbitratorVotes[msg.sender] = DisputeVote({
-            winner: _winner,
-            reasoning: _reasoning,
-            timestamp: block.timestamp,
-            hasVoted: true
+        stakingRewards[msg.sender][_poolId] = 0;
+        stakingPools[_poolId].stakeTimestamp[msg.sender] = block.timestamp;
+        
+        // Transfer rewards (in a real implementation, this would come from a reward pool)
+        payable(msg.sender).transfer(reward);
+        
+        emit RewardsClaimed(msg.sender, _poolId, reward);
+    }
+    
+    /**
+     * @dev Create educational module
+     */
+    function _createEducationModule(
+        string memory _title,
+        string memory _contentHash,
+        uint256 _difficulty,
+        uint256 _estimatedTime,
+        string[] memory _prerequisites,
+        uint256 _rewardCredits
+    ) internal returns (uint256) {
+        uint256 moduleId = educationModuleCount++;
+        EducationModule storage module = educationModules[moduleId];
+        module.id = moduleId;
+        module.title = _title;
+        module.content = _contentHash;
+        module.difficulty = _difficulty;
+        module.estimatedTime = _estimatedTime;
+        module.prerequisites = _prerequisites;
+        module.rewardCredits = _rewardCredits;
+        module.instructor = msg.sender;
+        module.isActive = true;
+        
+        return moduleId;
+    }
+    
+    /**
+     * @dev Complete an education module
+     */
+    function completeEducationModule(uint256 _moduleId, uint256 _score) external onlyMember {
+        require(_moduleId < educationModuleCount, "Module does not exist");
+        EducationModule storage module = educationModules[_moduleId];
+        require(module.isActive, "Module is not active");
+        require(!module.completed[msg.sender], "Module already completed");
+        require(_score >= 70, "Minimum score of 70 required");
+        
+        // Check prerequisites
+        for (uint256 i = 0; i < module.prerequisites.length; i++) {
+            // In a real implementation, check if prerequisite modules are completed
+        }
+        
+        module.completed[msg.sender] = true;
+        module.scores[msg.sender] = _score;
+        module.completionCount++;
+        
+        memberEducationCompleted[msg.sender].push(_moduleId);
+        memberLearningCredits[msg.sender] += module.rewardCredits;
+        
+        // Bonus reputation for high scores
+        if (_score >= 90) {
+            memberReputation[msg.sender] += 20;
+        } else if (_score >= 80) {
+            memberReputation[msg.sender] += 10;
+        }
+        
+        emit EducationModuleCompleted(msg.sender, _moduleId, _score);
+        emit LearningCreditsEarned(msg.sender, module.rewardCredits);
+        
+        // Check for educator achievement
+        if (memberEducationCompleted[msg.sender].length >= 5) {
+            _mintNFTReward(msg.sender, AchievementType.EDUCATOR, 3);
+        }
+    }
+    
+    /**
+     * @dev Mint NFT reward for achievements
+     */
+    function _mintNFTReward(address _recipient, AchievementType _achievementType, uint256 _rarity) internal {
+        uint256 tokenId = nftRewardCount++;
+        NFTReward storage reward = nftRewards[tokenId];
+        reward.tokenId = tokenId;
+        reward.recipient = _recipient;
+        reward.achievementType = _achievementType;
+        reward.rarity = _rarity;
+        reward.mintedAt = block.timestamp;
+        reward.isTransferable = true;
+        
+        // Set name and bonus reputation based on achievement type
+        if (_achievementType == AchievementType.FIRST_PROPOSAL) {// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+/**
+ * @title Enhanced DAO - Decentralized Autonomous Organization
+ * @dev A comprehensive smart contract for managing proposals, voting, governance with advanced features
+ */
+contract EnhancedDAO {
+    // Struct to represent a proposal
+    struct Proposal {
+        uint256 id;
+        string title;
+        string description;
+        address proposer;
+        uint256 yesVotes;
+        uint256 noVotes;
+        uint256 abstainVotes;
+        uint256 deadline;
+        bool executed;
+        bool exists;
+        ProposalType proposalType;
+        address targetAddress;
+        uint256 value;
+        bytes data;
+        uint256 minQuorum;
+        uint256 creationTime;
+        string[] tags;
+        uint256 executionDelay;
+        bool vetoed;
+        address vetoer;
+        mapping(address => string) voteReasons;
+        uint256 discussionDeadline;
+        uint256 fundingGoal;
+        uint256 currentFunding;
+        bool isFundingGoalMet;
+        mapping(address => uint256) fundingContributions;
+        uint256 priorityScore;
+        bool requiresKYC;
+        uint256 minimumParticipation;
+        // New proposal fields
+        uint256 sentimentScore;
+        mapping(address => uint256) memberEngagement;
+        bool requiresAudit;
+        address auditor;
+        bool auditPassed;
+        uint256 estimatedImpact;
+        string[] dependencies;
+        uint256 carbonFootprint;
+        bool isUrgent;
+    }
+    
+    // Struct for member profile
+    struct MemberProfile {
+        string name;
+        string bio;
+        string avatarHash; // IPFS hash
+        uint256 reputation;
+        uint256 proposalsCreated;
+        uint256 votesParticipated;
+        bool isActive;
+        uint256 lastActivity;
+        string[] skills;
+        string[] interests;
+        uint256 joinedAt;
+        uint256 contributionScore;
+        bool isBlacklisted;
+        string email;
+        string discord;
+        string twitter;
+        uint256 referralsCount;
+        address referredBy;
+        uint256 totalEarnings;
+        bool isPremiumMember;
+        uint256 premiumMembershipExpiry;
+        string[] certifications;
+        uint256 activityStreak;
+        uint256 lastStreakUpdate;
+        mapping(string => uint256) skillEndorsements;
+        uint256 mentorshipScore;
+        // New member fields
+        uint256 innovationIndex;
+        mapping(string => uint256) badgeCount;
+        uint256 communityRanking;
+        uint256 collaborationScore;
+        bool isInfluencer;
+        uint256 followerCount;
+        string[] achievements;
+        uint256 learningCredits;
+        mapping(address => bool) trustedConnections;
+    }
+    
+    // Struct for committees
+    struct Committee {
+        string name;
+        string description;
+        address[] members;
+        mapping(address => bool) isMember;
+        uint256 createdAt;
+        bool isActive;
+        string purpose;
+        uint256 budget;
+        uint256 spentBudget;
+        address chairperson;
+        uint256[] committeeProposals;
+        mapping(address => bool) hasVotingRights;
+        uint256 performanceScore;
+        uint256 lastReviewDate;
+        mapping(address => uint256) memberContributions;
+        bool requiresElection;
+        uint256 termLength;
+        uint256 termEndDate;
+        // New committee fields
+        uint256 efficiency;
+        mapping(string => uint256) specializations;
+        bool isPublic;
+        uint256 maxMembers;
+        string[] workingGroups;
+        mapping(address => uint256) memberRatings;
+    }
+    
+    // Struct for bounties
+    struct Bounty {
+        uint256 id;
+        string title;
+        string description;
+        uint256 reward;
+        address creator;
+        address assignee;
+        uint256 deadline;
+        bool completed;
+        bool paid;
+        string[] skills;
+        BountyStatus status;
+        string[] deliverables;
+        uint256 createdAt;
+        address[] applicants;
+        mapping(address => string) applications;
+        uint256 approvalCount;
+        mapping(address => bool) approvals;
+        uint256 milestoneCount;
+        mapping(uint256 => Milestone) milestones;
+        uint256 escrowAmount;
+        bool isRecurring;
+        uint256 recurrenceInterval;
+        uint256 difficultyLevel;
+        mapping(address => uint256) bidAmounts;
+        bool allowsBidding;
+        // New bounty fields
+        uint256 qualityScore;
+        mapping(address => uint256) workerPerformance;
+        bool requiresTeam;
+        uint256 maxTeamSize;
+        address[] team;
+        uint256 urgencyLevel;
+        string[] mentorshipOffered;
+    }
+    
+    // New struct for NFT rewards and achievements
+    struct NFTReward {
+        uint256 tokenId;
+        string name;
+        string description;
+        string metadataURI;
+        address recipient;
+        uint256 mintedAt;
+        AchievementType achievementType;
+        uint256 rarity; // 1-5 scale
+        bool isTransferable;
+        uint256 bonusReputation;
+        mapping(address => bool) hasApproved; // For rare NFTs requiring approval
+    }
+    
+    // Struct for DAO events and activities
+    struct DAOEvent {
+        uint256 id;
+        string title;
+        string description;
+        uint256 startTime;
+        uint256 endTime;
+        address organizer;
+        string location; // Can be virtual
+        uint256 maxAttendees;
+        uint256 currentAttendees;
+        mapping(address => bool) attendees;
+        EventType eventType;
+        uint256 cost;
+        bool requiresRSVP;
+        string[] speakers;
+        mapping(address => string) feedback;
+        uint256 avgRating;
+        bool isRecurring;
+        uint256 seriesId;
+    }
+    
+    // Struct for liquidity mining and staking
+    struct StakingPool {
+        uint256 id;
+        string name;
+        uint256 totalStaked;
+        uint256 rewardRate; // per block
+        uint256 lockupPeriod;
+        mapping(address => uint256) userStakes;
+        mapping(address => uint256) userRewards;
+        mapping(address => uint256) stakeTimestamp;
+        bool isActive;
+        uint256 minStake;
+        uint256 maxStake;
+        StakeType stakeType;
+        uint256 poolStartTime;
+        uint256 poolEndTime;
+    }
+    
+    // Struct for governance proposals analysis and prediction
+    struct ProposalAnalytics {
+        uint256 proposalId;
+        uint256 predictedOutcome; // 0-100 probability of passing
+        uint256 stakeholderSentiment;
+        mapping(string => uint256) topicRelevance;
+        uint256 economicImpact;
+        uint256 riskAssessment;
+        string[] similarProposals;
+        mapping(address => uint256) influencerSupport;
+        uint256 timeToDecision;
+        bool hasControversy;
+    }
+    
+    // Struct for cross-DAO collaboration
+    struct InterDAOCollaboration {
+        uint256 id;
+        address[] participatingDAOs;
+        string objective;
+        uint256 sharedBudget;
+        mapping(address => uint256) contributions;
+        uint256 startTime;
+        uint256 endTime;
+        bool isActive;
+        mapping(address => bool) hasApproved;
+        string[] deliverables;
+        address coordinator;
+        uint256 successMetrics;
+    }
+    
+    // Struct for governance education and onboarding
+    struct EducationModule {
+        uint256 id;
+        string title;
+        string content; // IPFS hash
+        uint256 difficulty; // 1-5
+        uint256 estimatedTime; // in minutes
+        string[] prerequisites;
+        uint256 rewardCredits;
+        mapping(address => bool) completed;
+        mapping(address => uint256) scores;
+        address instructor;
+        bool isActive;
+        string[] tags;
+        uint256 completionCount;
+    }
+    
+    // Struct for proposal templates and automation
+    struct ProposalTemplate {
+        uint256 id;
+        string name;
+        string description;
+        ProposalType category;
+        string[] requiredFields;
+        uint256 defaultVotingPeriod;
+        uint256 defaultQuorum;
+        bool requiresDeposit;
+        uint256 depositAmount;
+        address creator;
+        uint256 usageCount;
+        bool isPublic;
+        mapping(address => bool) canUse;
+    }
+    
+    // Enhanced enums
+    enum AchievementType {
+        FIRST_PROPOSAL,
+        ACTIVE_VOTER,
+        COMMITTEE_LEADER,
+        BOUNTY_HUNTER,
+        MENTOR,
+        INNOVATOR,
+        COMMUNITY_BUILDER,
+        LONG_TIME_MEMBER,
+        HIGH_REPUTATION,
+        EDUCATOR,
+        COLLABORATOR,
+        EARLY_ADOPTER
+    }
+    
+    enum EventType {
+        GOVERNANCE_MEETING,
+        EDUCATIONAL_WORKSHOP,
+        NETWORKING,
+        HACKATHON,
+        CONFERENCE,
+        SOCIAL,
+        STRATEGIC_PLANNING,
+        ONBOARDING,
+        VOTING_SESSION,
+        CELEBRATION
+    }
+    
+    enum StakeType {
+        GOVERNANCE,
+        LIQUIDITY_PROVISION,
+        VALIDATOR,
+        INSURANCE,
+        DEVELOPMENT_FUND,
+        MARKETING_FUND,
+        EMERGENCY_FUND
+    }
+    
+    // Existing enums (keeping all previous ones)
+    enum DisputeCategory {
+        CONTRACT_BREACH,
+        GOVERNANCE_VIOLATION,
+        MISCONDUCT,
+        BOUNTY_DISPUTE,
+        PARTNERSHIP_ISSUE,
+        TECHNICAL_DISPUTE
+    }
+    
+    enum MemberRole {
+        BASIC_MEMBER,
+        COMMITTEE_MEMBER,
+        MODERATOR,
+        ADMIN,
+        EMERGENCY_COUNCIL,
+        ARBITRATOR,
+        MENTOR,
+        AMBASSADOR
+    }
+    
+    enum ProposalType {
+        GENERAL,
+        TREASURY,
+        MEMBERSHIP,
+        PARAMETER_CHANGE,
+        COMMITTEE_CREATION,
+        BOUNTY_CREATION,
+        GOVERNANCE_UPGRADE,
+        PARTNERSHIP,
+        STRATEGIC,
+        GRANT,
+        CODE_UPGRADE,
+        POLICY_CHANGE,
+        CROSS_CHAIN,
+        AUTOMATED_ACTION,
+        DISPUTE_RESOLUTION
+    }
+    
+    enum BountyStatus {
+        OPEN,
+        ASSIGNED,
+        IN_PROGRESS,
+        SUBMITTED,
+        COMPLETED,
+        CANCELLED,
+        DISPUTED,
+        MILESTONE_PENDING,
+        ESCROW_RELEASED
+    }
+    
+    enum ProposalCategory {
+        DEVELOPMENT,
+        MARKETING,
+        OPERATIONS,
+        RESEARCH,
+        COMMUNITY,
+        INFRASTRUCTURE,
+        GRANTS,
+        PARTNERSHIPS,
+        EDUCATION,
+        LEGAL_COMPLIANCE,
+        TREASURY_MANAGEMENT,
+        CROSS_CHAIN_OPERATIONS
+    }
+    
+    enum VoteOption {
+        YES,
+        NO,
+        ABSTAIN
+    }
+    
+    enum MembershipTier {
+        BASIC,
+        PREMIUM,
+        PLATINUM,
+        DIAMOND,
+        FOUNDER,
+        LIFETIME
+    }
+    
+    // State variables for new functionality
+    mapping(uint256 => NFTReward) public nftRewards;
+    mapping(uint256 => DAOEvent) public daoEvents;
+    mapping(uint256 => StakingPool) public stakingPools;
+    mapping(uint256 => ProposalAnalytics) public proposalAnalytics;
+    mapping(uint256 => InterDAOCollaboration) public interDAOCollaborations;
+    mapping(uint256 => EducationModule) public educationModules;
+    mapping(uint256 => ProposalTemplate) public proposalTemplates;
+    
+    mapping(address => uint256[]) public memberNFTs;
+    mapping(address => uint256) public memberLearningCredits;
+    mapping(address => uint256[]) public memberEducationCompleted;
+    mapping(address => mapping(uint256 => uint256)) public stakingRewards;
+    mapping(address => uint256) public totalStakedByMember;
+    mapping(string => uint256) public skillMarketDemand;
+    mapping(address => bool) public isInfluencer;
+    mapping(address => uint256) public influencerFollowers;
+    mapping(address => string[]) public memberBadges;
+    mapping(uint256 => address[]) public eventAttendees;
+    mapping(address => uint256) public memberEventCount;
+    mapping(address => mapping(string => uint256)) public skillCertifications;
+    
+    // New counters
+    uint256 public nftRewardCount;
+    uint256 public daoEventCount;
+    uint256 public stakingPoolCount;
+    uint256 public interDAOCollaborationCount;
+    uint256 public educationModuleCount;
+    uint256 public proposalTemplateCount;
+    
+    // Enhanced governance parameters
+    struct GovernanceParams {
+        uint256 votingPeriod;
+        uint256 quorum;
+        uint256 minProposalStake;
+        uint256 proposalExecutionDelay;
+        uint256 reputationThreshold;
+        uint256 maxVotingPeriod;
+        uint256 minVotingPeriod;
+        uint256 vetoWindow;
+        // New parameters
+        uint256 nftRewardThreshold;
+        uint256 stakingRewardRate;
+        uint256 learningCreditRate;
+        uint256 influencerThreshold;
+        uint256 collaborationBonus;
+        uint256 innovationIncentive;
+        uint256 sustainabilityWeight;
+        uint256 diversityBonus;
+    }
+    
+    // Events for new functionality
+    event NFTRewardMinted(uint256 indexed tokenId, address indexed recipient, AchievementType achievementType);
+    event DAOEventCreated(uint256 indexed eventId, address indexed organizer, string title);
+    event EventAttendanceMarked(uint256 indexed eventId, address indexed attendee);
+    event StakingPoolCreated(uint256 indexed poolId, string name, uint256 rewardRate);
+    event TokensStaked(address indexed user, uint256 indexed poolId, uint256 amount);
+    event RewardsClaimed(address indexed user, uint256 indexed poolId, uint256 amount);
+    event EducationModuleCompleted(address indexed member, uint256 indexed moduleId, uint256 score);
+    event SkillCertified(address indexed member, string skill, uint256 level);
+    event InterDAOCollaborationStarted(uint256 indexed collaborationId, address[] participatingDAOs);
+    event ProposalTemplateCreated(uint256 indexed templateId, string name, address creator);
+    event BadgeAwarded(address indexed member, string badge);
+    event LearningCreditsEarned(address indexed member, uint256 credits);
+    event InfluencerStatusChanged(address indexed member, bool isInfluencer);
+    event ProposalAnalyticsUpdated(uint256 indexed proposalId, uint256 predictedOutcome);
+    
+    // Existing state variables and mappings (keep all previous ones)
+    mapping(uint256 => Proposal) public proposals;
+    mapping(uint256 => mapping(address => bool)) public hasVoted;
+    mapping(uint256 => mapping(address => VoteOption)) public memberVote;
+    mapping(address => bool) public isMember;
+    mapping(address => uint256) public memberSince;
+    mapping(address => uint256) public votingPower;
+    mapping(address => MemberProfile) public memberProfiles;
+    mapping(address => uint256) public memberReputation;
+    mapping(address => MembershipTier) public membershipTiers;
+    mapping(address => bool) public isVerifiedMember;
+    mapping(address => bool) public isModerator;
+    mapping(address => uint256) public moderatorSince;
+    mapping(address => uint256) public memberVoteCredits;
+    
+    uint256 public proposalCount;
+    uint256 public memberCount;
+    uint256 public treasury;
+    address public admin;
+    GovernanceParams public governanceParams;
+    
+    // Modifiers for new functionality
+    modifier hasLearningCredits(uint256 _requiredCredits) {
+        require(memberLearningCredits[msg.sender] >= _requiredCredits, "Insufficient learning credits");
+        _;
+    }
+    
+    modifier onlyInfluencer() {
+        require(isInfluencer[msg.sender], "Only influencers can perform this action");
+        _;
+    }
+    
+    modifier eventExists(uint256 _eventId) {
+        require(_eventId < daoEventCount, "Event does not exist");
+        _;
+    }
+    
+    modifier stakingPoolExists(uint256 _poolId) {
+        require(_poolId < stakingPoolCount, "Staking pool does not exist");
+        _;
+    }
+    
+    // Keep existing modifiers
+    modifier onlyMember() {
+        require(isMember[msg.sender], "Only members can perform this action");
+        _;
+    }
+    
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "Only admin can perform this action");
+        _;
+    }
+    
+    modifier onlyModerator() {
+        require(isModerator[msg.sender], "Only moderators can perform this action");
+        _;
+    }
+    
+    modifier hasReputation(uint256 _minReputation) {
+        require(memberReputation[msg.sender] >= _minReputation, "Insufficient reputation");
+        _;
+    }
+    
+    modifier onlyActiveMember() {
+        require(isMember[msg.sender] && memberProfiles[msg.sender].isActive, "Only active members allowed");
+        _;
+    }
+    
+    modifier onlyVerifiedMember() {
+        require(isVerifiedMember[msg.sender], "Only verified members allowed");
+        _;
+    }
+    
+    modifier proposalExists(uint256 _proposalId) {
+        require(proposals[_proposalId].exists, "Proposal does not exist");
+        _;
+    }
+    
+    // Constructor (enhanced with new features)
+    constructor() {
+        admin = msg.sender;
+        isMember[msg.sender] = true;
+        memberSince[msg.sender] = block.timestamp;
+        votingPower[msg.sender] = 100;
+        memberCount = 1;
+        memberReputation[msg.sender] = 1000;
+        membershipTiers[msg.sender] = MembershipTier.FOUNDER;
+        isVerifiedMember[msg.sender] = true;
+        isModerator[msg.sender] = true;
+        moderatorSince[msg.sender] = block.timestamp;
+        memberVoteCredits[msg.sender] = 100;
+        memberLearningCredits[msg.sender] = 100;
+        isInfluencer[msg.sender] = true;
+        influencerFollowers[msg.sender] = 1000;
+        
+        // Initialize governance parameters with new fields
+        governanceParams = GovernanceParams({
+            votingPeriod: 7 days,
+            quorum: 51,
+            minProposalStake: 0.1 ether,
+            proposalExecutionDelay: 2 days,
+            reputationThreshold: 100,
+            maxVotingPeriod: 30 days,
+            minVotingPeriod: 1 days,
+            vetoWindow: 3 days,
+            nftRewardThreshold: 500,
+            stakingRewardRate: 100, // 1% per day
+            learningCreditRate: 10,
+            influencerThreshold: 500,
+            collaborationBonus: 50,
+            innovationIncentive: 100,
+            sustainabilityWeight: 25,
+            diversityBonus: 30
         });
         
-        // Check if we can resolve the dispute
-        _tryResolveDispute(_disputeId);
+        // Create initial education modules
+        _createEducationModule(
+            "DAO Governance Fundamentals",
+            "QmEducationContent1",
+            1,
+            30,
+            new string[](0),
+            25
+        );
+        
+        // Create initial staking pool
+        _createStakingPool(
+            "Governance Staking",
+            100, // 1% reward rate
+            30 days,
+            0.1 ether,
+            10 ether,
+            StakeType.GOVERNANCE
+        );
+        
+        // Award founder NFT
+        _mintNFTReward(msg.sender, AchievementType.EARLY_ADOPTER, 5);
     }
     
     /**
-     * @dev Try to resolve dispute based on arbitrator votes
+     * @dev Create a new DAO event
      */
-    function _tryResolveDispute(uint256 _disputeId) internal {
-        Dispute storage dispute = disputes[_disputeId];
-        
-        uint256 plaintiffVotes = 0;
-        uint256 defendantVotes = 0;
-        uint256 totalVotes = 0;
-        
-        for (uint256 i = 0; i < dispute.arbitrators.length; i++) {
-            address arbitrator = dispute.arbitrators[i];
-            if (dispute.arbitratorVotes[arbitrator].hasVoted) {
-                totalVotes++;
-                if (dispute.arbitratorVotes[arbitrator].winner == dispute.plaintiff) {
-                    plaintiffVotes++;
-                } else {
-                    defendantVotes++;
-                }
-            }
-        }
-        
-        // Resolve if majority reached or voting deadline passed
-        if ((plaintiffVotes > dispute.arbitrators.length / 2) || 
-            (defendantVotes > dispute.arbitrators.length / 2) ||
-            (block.timestamp > dispute.votingDeadline && totalVotes > 0)) {
-            
-            dispute.resolved = true;
-            if (plaintiffVotes > defendantVotes) {
-                dispute.winner = dispute.plaintiff;
-                // Transfer stake to winner
-                payable(dispute.plaintiff).transfer(dispute.stake);
-                // Apply penalties to defendant
-                _applyDisputePenalty(dispute.defendant, dispute.category);
-            } else {
-                dispute.winner = dispute.defendant;
-                // Penalize plaintiff for false dispute
-                _applyDisputePenalty(dispute.plaintiff, dispute.category);
-            }
-            
-            emit DisputeResolved(_disputeId, dispute.winner, dispute.stake);
-        }
-    }
-    
-    /**
-     * @dev Apply penalties based on dispute resolution
-     */
-    function _applyDisputePenalty(address _member, DisputeCategory _category) internal {
-        // Reduce reputation and trust score
-        memberReputation[_member] = memberReputation[_member] > 100 ? memberReputation[_member] - 100 : 0;
-        memberIdentities[_member].trustScore = memberIdentities[_member].trustScore > 200 ? 
-            memberIdentities[_member].trustScore - 200 : 0;
-        
-        // Category-specific penalties
-        if (_category == DisputeCategory.GOVERNANCE_VIOLATION) {
-            votingPower[_member] = votingPower[_member] > 20 ? votingPower[_member] - 20 : 1;
-            memberVoteCredits[_member] = memberVoteCredits[_member] > 10 ? memberVoteCredits[_member] - 10 : 1;
-        } else if (_category == DisputeCategory.MISCONDUCT) {
-            // Temporary suspension
-            memberProfiles[_member].isActive = false;
-            // Schedule reactivation in 30 days (would need timer mechanism)
-        }
-    }
-    
-    /**
-     * @dev Schedule automated action for execution
-     */
-    function scheduleAutomatedAction(
+    function createDAOEvent(
+        string memory _title,
         string memory _description,
-        bytes memory _callData,
-        address _targetContract,
-        uint256 _executeAt,
-        uint256 _gasLimit,
-        bool _requiresConfirmation
-    ) external onlyMember hasReputation(200) {
-        require(_executeAt > block.timestamp, "Execution time must be in future");
-        require(_gasLimit > 0, "Gas limit must be positive");
+        uint256 _startTime,
+        uint256 _endTime,
+        string memory _location,
+        uint256 _maxAttendees,
+        EventType _eventType,
+        uint256 _cost,
+        bool _requiresRSVP,
+        string[] memory _speakers
+    ) external onlyMember hasReputation(100) {
+        require(_startTime > block.timestamp, "Event must be in the future");
+        require(_endTime > _startTime, "End time must be after start time");
         
-        uint256 actionId = automatedActionCount++;
-        AutomatedAction storage action = automatedActions[actionId];
-        action.id = actionId;
-        action.description = _description;
-        action.callData = _callData;
-        action.targetContract = _targetContract;
-        action.executeAt = _executeAt;
-        action.gasLimit = _gasLimit;
-        action.creator = msg.sender;
-        action.requiresConfirmation = _requiresConfirmation;
+        uint256 eventId = daoEventCount++;
+        DAOEvent storage newEvent = daoEvents[eventId];
+        newEvent.id = eventId;
+        newEvent.title = _title;
+        newEvent.description = _description;
+        newEvent.startTime = _startTime;
+        newEvent.endTime = _endTime;
+        newEvent.organizer = msg.sender;
+        newEvent.location = _location;
+        newEvent.maxAttendees = _maxAttendees;
+        newEvent.eventType = _eventType;
+        newEvent.cost = _cost;
+        newEvent.requiresRSVP = _requiresRSVP;
+        newEvent.speakers = _speakers;
         
-        emit AutomatedActionScheduled(actionId, _executeAt);
+        // Award reputation bonus for organizing events
+        memberReputation[msg.sender] += 25;
+        memberProfiles[msg.sender].contributionScore += 15;
+        
+        emit DAOEventCreated(eventId, msg.sender, _title);
     }
     
     /**
-     * @dev Execute scheduled automated action
+     * @dev RSVP or attend a DAO event
      */
-    function executeAutomatedAction(uint256 _actionId) external {
-        AutomatedAction storage action = automatedActions[_actionId];
-        require(block.timestamp >= action.executeAt, "Not ready for execution");
-        require(!action.executed && !action.cancelled, "Action already processed");
+    function attendEvent(uint256 _eventId) external payable eventExists(_eventId) onlyMember {
+        DAOEvent storage eventData = daoEvents[_eventId];
+        require(block.timestamp <= eventData.endTime, "Event has ended");
+        require(!eventData.attendees[msg.sender], "Already registered");
+        require(eventData.currentAttendees < eventData.maxAttendees, "Event is full");
         
-        if (action.requiresConfirmation) {
-            require(action.confirmationCount >= 3, "Insufficient confirmations");
+        if (eventData.cost > 0) {
+            require(msg.value >= eventData.cost, "Insufficient payment");
         }
         
-        action.executed = true;
+        eventData.attendees[msg.sender] = true;
+        eventData.currentAttendees++;
+        eventAttendees[_eventId].push(msg.sender);
+        memberEventCount[msg.sender]++;
         
-        // Execute the call with specified gas limit
-        (bool success, ) = action.targetContract.call{gas: action.gasLimit}(action.callData);
+        // Award attendance benefits
+        memberReputation[msg.sender] += 5;
+        memberLearningCredits[msg.sender] += 2;
         
-        emit AutomatedActionExecuted(_actionId, success);
-    }
-    
-    /**
-     * @dev Confirm automated action (for actions requiring confirmation)
-     */
-    function confirmAutomatedAction(uint256 _actionId) external onlyVerifiedMember {
-        AutomatedAction storage action = automatedActions[_actionId];
-        require(action.requiresConfirmation, "Action doesn't require confirmation");
-        require(!action.hasConfirmed[msg.sender], "Already confirmed");
-        require(block.timestamp < action.executeAt, "Confirmation period ended");
-        
-        action.hasConfirmed[msg.sender] = true;
-        action.confirmationCount++;
-    }
-    
-    /**
-     * @dev Provide funding for a specific proposal
-     */
-    function fundProposal(uint256 _proposalId) external payable proposalExists(_proposalId) {
-        Proposal storage proposal = proposals[_proposalId];
-        require(proposal.fundingGoal > 0, "Proposal doesn't accept funding");
-        require(proposal.currentFunding < proposal.fundingGoal, "Funding goal already met");
-        require(msg.value > 0, "Must send some funds");
-        
-        proposal.fundingContributions[msg.sender] += msg.value;
-        proposal.currentFunding += msg.value;
-        
-        if (proposal.currentFunding >= proposal.fundingGoal) {
-            proposal.isFundingGoalMet = true;
+        // Special rewards for educational events
+        if (eventData.eventType == EventType.EDUCATIONAL_WORKSHOP) {
+            memberLearningCredits[msg.sender] += 5;
         }
         
-        // Increase proposal priority based on funding
-        proposal.priorityScore += msg.value / 0.01 ether; // 1 priority point per 0.01 ETH
+        emit EventAttendanceMarked(_eventId, msg.sender);
         
-        emit ProposalFunded(_proposalId, msg.sender, msg.value);
+        // Check for community builder achievement
+        if (memberEventCount[msg.sender] >= 10) {
+            _mintNFTReward(msg.sender, AchievementType.COMMUNITY_BUILDER, 3);
+        }
     }
     
     /**
-     * @dev Start mentorship relationship
+     * @dev Create a new staking pool
      */
-    function startMentorship(address _mentee) external onlyMentor {
-        require(isMember[_mentee], "Mentee must be a member");
-        require(_mentee != msg.sender, "Cannot mentor yourself");
+    function _createStakingPool(
+        string memory _name,
+        uint256 _rewardRate,
+        uint256 _lockupPeriod,
+        uint256 _minStake,
+        uint256 _maxStake,
+        StakeType _stakeType
+    ) internal returns (uint256) {
+        uint256 poolId = stakingPoolCount++;
+        StakingPool storage pool = stakingPools[poolId];
+        pool.id = poolId;
+        pool.name = _name;
+        pool.rewardRate = _rewardRate;
+        pool.lockupPeriod = _lockupPeriod;
+        pool.minStake = _minStake;
+        pool.maxStake = _maxStake;
+        pool.stakeType = _stakeType;
+        pool.isActive = true;
+        pool.poolStartTime = block.timestamp;
+        pool.poolEndTime = block.timestamp + 365 days; // Default 1 year
         
-        memberMentees[msg.sender].push(_mentee);
-        memberMentorshipCount[msg.sender]++;
-        memberProfiles[msg.sender].mentorshipScore += 10;
+        emit StakingPoolCreated(poolId, _name, _rewardRate);
+        return poolId;
+    }
+    
+    /**
+     * @dev Stake tokens in a specific pool
+     */
+    function stakeTokens(uint256 _poolId, uint256 _amount) external payable stakingPoolExists(_poolId) onlyMember {
+        StakingPool storage pool = stakingPools[_poolId];
+        require(pool.isActive, "Pool is not active");
+        require(block.timestamp >= pool.poolStartTime && block.timestamp <= pool.poolEndTime, "Pool not available");
+        require(_amount >= pool.minStake, "Below minimum stake");
+        require(_amount <= pool.maxStake, "Exceeds maximum stake");
+        require(msg.value >= _amount, "Insufficient funds sent");
         
-        // Mentees get bonus reputation for being mentored
-        memberReputation[_mentee] += 25;
+        // Calculate existing rewards before updating stake
+        _updateStakingRewards(msg.sender, _poolId);
         
-        emit MentorshipStarted(msg.sender,
+        pool.userStakes[msg.sender] += _amount;
+        pool.totalStaked += _amount;
+        pool.stakeTimestamp[msg.sender] = block.timestamp;
+        totalStakedByMember[msg.sender] += _amount;
+        
+        // Reputation bonus for staking
+        memberReputation[msg.sender] += _amount / 0.1 ether; // 1 reputation per 0.1 ETH
+        
+        emit TokensStaked(msg.sender, _poolId, _amount);
+        
+        // Check for validator achievement
+        if (totalStakedByMember[msg.sender] >= 10 ether) {
+            _mintNFTReward(msg.sender, AchievementType.HIGH_REPUTATION, 4);
+        }
+    }
+    
+    /**
+     * @dev Update staking rewards for a user
+     */
+    function _updateStakingRewards(address _user, uint256 _poolId) internal {
+        StakingPool storage pool = stakingPools[_poolId];
+        if (pool.userStakes[_user] > 0) {
+            uint256 stakeDuration = block.timestamp - pool.stakeTimestamp[_user];
+            uint256 reward = (pool.userStakes[_user] * pool.rewardRate * stakeDuration) / (100 * 1 days);
+            stakingRewards[_user][_poolId] += reward;
+        }
+    }
+    
+    /**
+     * @dev Claim staking rewards
+     */
+    function claimStakingRewards(uint256 _poolId) external stakingPoolExists(_poolId) onlyMember {
+        _updateStakingRewards(msg.sender, _poolId);
+        uint256 reward = stakingRewards[msg.sender][_poolId];
+        require(reward > 0, "No rewards to claim");
+        
+        stakingRewards[msg.sender][_poolId] = 0;
+        stakingPools[_poolId].stakeTimestamp[msg.sender] = block.timestamp;
+        
+        // Transfer rewards (in a real implementation, this would come from a reward pool)
+        payable(msg.sender).transfer(reward);
+        
+        emit RewardsClaimed(msg.sender, _poolId, reward);
+    }
+    
+    /**
+     * @dev Create educational module
+     */
+    function _createEducationModule(
+        string memory _title,
+        string memory _contentHash,
+        uint256 _difficulty,
+        uint256 _estimatedTime,
+        string[] memory _prerequisites,
+        uint256 _rewardCredits
+    ) internal returns (uint256) {
+        uint256 moduleId = educationModuleCount++;
+        EducationModule storage module = educationModules[moduleId];
+        module.id = moduleId;
+        module.title = _title;
+        module.content = _contentHash;
+        module.difficulty = _difficulty;
+        module.estimatedTime = _estimatedTime;
+        module.prerequisites = _prerequisites;
+        module.rewardCredits = _rewardCredits;
+        module.instructor = msg.sender;
+        module.isActive = true;
+        
+        return moduleId;
+    }
+    
+    /**
+     * @dev Complete an education module
+     */
+    function completeEducationModule(uint256 _moduleId, uint256 _score) external onlyMember {
+        require(_moduleId < educationModuleCount, "Module does not exist");
+        EducationModule storage module = educationModules[_moduleId];
+        require(module.isActive, "Module is not active");
+        require(!module.completed[msg.sender], "Module already completed");
+        require(_score >= 70, "Minimum score of 70 required");
+        
+        // Check prerequisites
+        for (uint256 i = 0; i < module.prerequisites.length; i++) {
+            // In a real implementation, check if prerequisite modules are completed
+        }
+        
+        module.completed[msg.sender] = true;
+        module.scores[msg.sender] = _score;
+        module.completionCount++;
+        
+        memberEducationCompleted[msg.sender].push(_moduleId);
+        memberLearningCredits[msg.sender] += module.rewardCredits;
+        
+        // Bonus reputation for high scores
+        if (_score >= 90) {
+            memberReputation[msg.sender] += 20;
+        } else if (_score >= 80) {
+            memberReputation[msg.sender] += 10;
+        }
+        
+        emit EducationModuleCompleted(msg.sender, _moduleId, _score);
+        emit LearningCreditsEarned(msg.sender, module.rewardCredits);
+        
+        // Check for educator achievement
+        if (memberEducationCompleted[msg.sender].length >= 5) {
+            _mintNFTReward(msg.sender, AchievementType.EDUCATOR, 3);
+        }
+    }
+    
+    /**
+     * @dev Mint NFT reward for achievements
+     */
+    function _mintNFTReward(address _recipient, AchievementType _achievementType, uint256 _rarity) internal {
+        uint256 tokenId = nftRewardCount++;
+        NFTReward storage reward = nftRewards[tokenId];
+        reward.tokenId = tokenId;
+        reward.recipient = _recipient;
+        reward.achievementType = _achievementType;
+        reward.rarity = _rarity;
+        reward.mintedAt = block.timestamp;
+        reward.isTransferable = true;
+        
+        // Set name and bonus reputation based on achievement type
+        if (_achievementType == AchievementType.FIRST_PROPOSAL) {
+        
+         

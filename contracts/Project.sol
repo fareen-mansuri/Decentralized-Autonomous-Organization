@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+ // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -14,620 +14,623 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
  */
 contract UltraEnhancedDAO is ERC721, ReentrancyGuard, AccessControl {
     
-    // ============ EXTENDED STRUCTS ============
+    // ============ ROLE DEFINITIONS ============
     
-    // Quantum-Resistant Governance Module
-    struct QuantumGovernance {
-        uint256 moduleId;
-        bytes32 quantumProofHash; // Post-quantum cryptographic proof
-        mapping(address => bytes32) quantumSignatures; // Quantum-resistant signatures
-        uint256 latticeSecurityLevel; // CRYSTALS-Dilithium security level
-        bool isQuantumSecure;
-        mapping(uint256 => bytes32) quantumVoteCommitments; // Quantum vote commitments
-        uint256 quantumRandomSeed; // Quantum random number seed
-        address quantumOracle; // Quantum randomness oracle
-        mapping(address => uint256) quantumNonce; // Prevent quantum replay attacks
-        bool postQuantumEnabled;
-    }
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant VALIDATOR_ROLE = keccak256("VALIDATOR_ROLE");
+    bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
+    bytes32 public constant BRIDGE_OPERATOR_ROLE = keccak256("BRIDGE_OPERATOR_ROLE");
+    bytes32 public constant TREASURY_MANAGER_ROLE = keccak256("TREASURY_MANAGER_ROLE");
+    bytes32 public constant QUANTUM_ADMIN_ROLE = keccak256("QUANTUM_ADMIN_ROLE");
+    bytes32 public constant ESG_AUDITOR_ROLE = keccak256("ESG_AUDITOR_ROLE");
+    bytes32 public constant ML_OPERATOR_ROLE = keccak256("ML_OPERATOR_ROLE");
     
-    // Advanced ML/AI Predictive Analytics
-    struct PredictiveAnalytics {
-        uint256 modelId;
-        string modelType; // Neural Network, Random Forest, SVM, etc.
-        mapping(uint256 => uint256) proposalSuccessProbability;
-        mapping(address => uint256) memberBehaviorPattern; // Behavioral prediction
-        uint256 treasuryForecast; // Treasury value prediction
-        mapping(string => uint256) marketSentimentPrediction;
-        uint256 governanceHealthPrediction;
-        mapping(uint256 => uint256) riskPrediction;
-        uint256 memberChurnPrediction;
-        bytes32 modelHash; // IPFS hash of ML model
-        uint256 accuracy; // Model accuracy percentage
-        uint256 lastTraining; // Last model training timestamp
-        mapping(string => uint256) featureWeights; // ML feature importance
-        bool isAutoRetraining; // Automated model retraining
-        uint256 predictionConfidence; // Confidence interval
-    }
+    // ============ ADVANCED STRUCTS ============
     
-    // Decentralized Autonomous Funding (DAF) System
-    struct AutonomousFunding {
-        uint256 fundId;
-        string fundStrategy; // Growth, Value, DeFi, etc.
-        mapping(address => uint256) assetWeights; // Dynamic asset allocation
-        uint256 totalFunds;
-        uint256 performanceTarget; // Target annual return
-        mapping(address => uint256) stakeholderAllocations;
-        bool isDiversified;
-        uint256 riskScore; // Calculated risk score
-        mapping(string => uint256) sectorExposure; // Sector diversification
-        uint256 liquidityRatio; // Liquidity requirement
-        address[] approvedDEXs; // Approved DEXs for trading
-        mapping(address => uint256) dexLimits; // Trading limits per DEX
-        uint256 rebalanceThreshold; // When to trigger rebalancing
-        bool enabledYieldFarming; // Yield farming capability
-        mapping(address => uint256) yieldStrategies; // Yield strategies
-        uint256 maxDrawdown; // Maximum acceptable loss
-        uint256 volatilityTarget; // Target volatility
-    }
-    
-    // Zero-Knowledge Privacy Layer
-    struct ZKPrivacyLayer {
-        uint256 privacyId;
-        bytes32 zkProofHash; // Zero-knowledge proof hash
-        mapping(address => bytes32) privateVoteCommitments;
-        mapping(uint256 => bytes32) privateProp
-
-
-alBallots; // Private proposal voting
-        bool isPrivateVoting; // Enable private voting
-        bytes32 merkleRoot; // Merkle root for ZK proofs
-        mapping(address => bool) zkVerifiedMembers;
-        uint256 anonymitySet; // Size of anonymity set
-        mapping(bytes32 => bool) nullifierHashes; // Prevent double voting
-        address zkVerifier; // ZK proof verifier contract
-        mapping(uint256 => bytes32) encryptedVotes; // Encrypted vote data
-        bytes32 votingKey; // Shared voting key
-        mapping(address => bytes32) memberCommitments;
-        uint256 privacyLevel; // 1-10 privacy scale
-        bool enabledShielded; // Shielded transactions
-    }
-    
-    // Dynamic Consensus Mechanisms
-    struct ConsensusEngine {
+    // AI-Powered Sentiment Analysis
+    struct SentimentAnalysisEngine {
         uint256 engineId;
-        string consensusType; // PoS, PoW, PoA, DPoS, Byzantine, etc.
-        mapping(address => uint256) validatorStakes;
-        address[] activeValidators;
-        uint256 totalStaked;
-        uint256 slashingRate; // Penalty for misbehavior
-        mapping(address => uint256) validatorRewards;
-        uint256 blockTime; // Target block time
-        uint256 epochLength; // Validator rotation period
-        mapping(uint256 => address) epochValidators;
-        uint256 finalizationThreshold; // Finality threshold
-        bool isByzantineFaultTolerant;
-        mapping(address => uint256) validatorReputation;
-        uint256 maxValidators; // Maximum validator count
-        uint256 minStake; // Minimum stake to become validator
-        mapping(address => bool) isSlashed; // Slashed validators
-        uint256 consensusReward; // Reward for consensus participation
+        mapping(uint256 => int256) proposalSentiment; // -100 to +100 sentiment score
+        mapping(address => mapping(uint256 => int256)) memberSentimentHistory;
+        mapping(string => uint256) sentimentKeywords; // Keyword sentiment weights
+        uint256 totalAnalyzedProposals;
+        mapping(uint256 => uint256) sentimentVolatility; // Sentiment change rate
+        mapping(address => uint256) memberSentimentReliability;
+        bool enableRealTimeSentiment;
+        uint256 sentimentThreshold; // Minimum sentiment for proposal passage
+        mapping(uint256 => string) sentimentReasons; // Explanation for sentiment
+        mapping(address => bool) sentimentValidators; // Authorized sentiment validators
+        uint256 sentimentModelAccuracy;
+        mapping(uint256 => uint256) socialMediaSentiment; // External social sentiment
+        bool enableMultiSourceSentiment; // Multiple sentiment sources
+        mapping(bytes32 => uint256) sentimentCache; // Cached sentiment results
     }
     
-    // Advanced Oracle Integration System
-    struct OracleNetwork {
-        uint256 oracleId;
-        address[] oracles;
-        mapping(address => uint256) oracleStakes;
-        mapping(address => uint256) oracleReputations;
-        mapping(string => uint256) priceFeeds; // Asset price feeds
-        mapping(string => uint256) dataFeeds; // External data feeds
-        uint256 aggregationMethod; // Mean, Median, Weighted Average
-        uint256 deviationThreshold; // Maximum price deviation
-        mapping(address => uint256) oracleRewards;
-        uint256 disputePeriod; // Time to dispute oracle data
-        mapping(bytes32 => bool) disputedData;
-        uint256 slashingAmount; // Oracle slashing penalty
-        mapping(string => uint256) dataQuality; // Data quality scores
-        bool isDecentralized; // Decentralized oracle network
-        mapping(address => bool) authorizedOracles;
-        uint256 minimumOracles; // Minimum oracles for consensus
-        uint256 updateFrequency; // Data update frequency
+    // Dynamic Liquid Democracy
+    struct LiquidDemocracy {
+        uint256 systemId;
+        mapping(address => address) delegations; // Direct delegations
+        mapping(address => address[]) delegationChain; // Full delegation chain
+        mapping(address => uint256) delegationWeight; // Cumulative voting weight
+        mapping(uint256 => mapping(address => bool)) proposalDelegationUsed;
+        mapping(address => mapping(string => address)) expertDelegations; // Topic-specific delegations
+        mapping(address => string[]) expertiseAreas; // Member expertise areas
+        uint256 maxDelegationDepth; // Maximum delegation chain length
+        mapping(address => uint256) delegationReputation; // Delegate reputation
+        mapping(address => bool) isDelegateActive; // Active delegate status
+        mapping(uint256 => uint256) liquidVotingDeadline; // Deadline for liquid voting
+        bool enableTopicSpecificDelegation; // Enable expertise-based delegation
+        mapping(address => uint256) delegationHistory; // Historical delegation count
+        mapping(address => uint256) delegatePerformance; // Delegate performance metrics
+        uint256 minDelegationThreshold; // Minimum tokens to delegate
     }
     
-    // Interoperability Bridge Manager
-    struct BridgeManager {
-        uint256 bridgeId;
-        mapping(uint256 => address) chainContracts; // Chain ID to contract mapping
-        mapping(uint256 => bool) supportedChains;
-        mapping(bytes32 => bool) processedMessages;
-        uint256 bridgeFee; // Cross-chain transaction fee
-        mapping(address => uint256) lockedAssets; // Assets locked for bridging
-        mapping(bytes32 => uint256) bridgeDelay; // Time delay for security
-        address[] validators; // Bridge validators
+    // Advanced Proposal Lifecycle Management
+    struct ProposalLifecycle {
+        uint256 proposalId;
+        enum ProposalStage { 
+            Draft, PeerReview, Community, Voting, 
+            Implementation, Monitoring, Completed, Cancelled 
+        }
+        ProposalStage currentStage;
+        mapping(ProposalStage => uint256) stageTimestamps;
+        mapping(ProposalStage => address[]) stageApprovers;
+        mapping(address => mapping(ProposalStage => bool)) hasApproved;
+        uint256 requiredApprovalsPerStage;
+        mapping(ProposalStage => uint256) stageTimeout;
+        mapping(ProposalStage => bytes32) stageRequirements; // IPFS hash of requirements
+        bool enableAutomaticProgression;
+        mapping(ProposalStage => uint256) stageCost; // Cost to progress to next stage
+        mapping(address => mapping(ProposalStage => string)) stageComments;
+        uint256 totalStages;
+        mapping(ProposalStage => bool) isStageOptional;
+        mapping(uint256 => uint256) implementationProgress; // 0-100% completion
+        address[] implementationTeam;
+        mapping(address => uint256) implementationRewards;
+    }
+    
+    // Decentralized Arbitration System
+    struct ArbitrationSystem {
+        uint256 systemId;
+        struct Dispute {
+            uint256 disputeId;
+            address plaintiff;
+            address defendant;
+            string disputeType; // Contract, Governance, Financial, etc.
+            bytes32 evidenceHash; // IPFS hash of evidence
+            address[] arbitrators;
+            mapping(address => bool) arbitratorVotes; // True = plaintiff wins
+            uint256 arbitrationFee;
+            uint256 disputeDeadline;
+            bool isResolved;
+            address winner;
+            uint256 compensationAmount;
+            mapping(address => string) arbitratorReasons;
+            uint256 appealCount;
+            bool appealable;
+        }
+        mapping(uint256 => Dispute) disputes;
+        uint256 disputeCount;
+        mapping(address => uint256) arbitratorReputation;
+        mapping(address => bool) isArbitrator;
+        mapping(string => uint256) disputeTypeFees; // Fee per dispute type
+        uint256 minArbitrators; // Minimum arbitrators per dispute
+        uint256 maxArbitrators; // Maximum arbitrators per dispute
+        mapping(address => uint256) arbitratorStake; // Stake required to be arbitrator
+        uint256 arbitrationTimeout; // Maximum time for arbitration
+        mapping(uint256 => uint256) appealFees; // Appeal fees by level
+        uint256 maxAppeals; // Maximum appeal levels
+        bool enableDecentralizedArbitration;
+        mapping(bytes32 => bool) evidenceAuthenticity; // Evidence verification
+    }
+    
+    // Multi-Chain Governance Synchronization
+    struct MultiChainGovernance {
+        uint256 governanceId;
+        mapping(uint256 => address) chainContracts; // Chain ID to DAO contract
+        mapping(uint256 => bool) enabledChains;
+        mapping(bytes32 => bool) crossChainProposals; // Cross-chain proposal tracking
+        mapping(uint256 => mapping(uint256 => uint256)) chainVotingWeight; // Voting weight per chain
+        mapping(bytes32 => uint256) synchronizationDelay; // Delay for cross-chain sync
+        mapping(uint256 => uint256) chainConsensusThreshold; // Consensus threshold per chain
+        address[] crossChainValidators; // Cross-chain message validators
         mapping(address => bool) validatorStatus;
-        uint256 requiredValidations; // Minimum validations needed
-        mapping(bytes32 => uint256) validationCount;
-        mapping(bytes32 => mapping(address => bool)) validatorApprovals;
-        uint256 maxBridgeAmount; // Maximum bridge amount
-        mapping(address => uint256) dailyLimits; // Daily bridging limits
-        mapping(address => uint256) dailyVolume; // Daily bridge volume
-        bool emergencyStop; // Emergency bridge halt
+        uint256 requiredValidatorSignatures; // Required signatures for cross-chain messages
+        mapping(bytes32 => mapping(address => bool)) validatorSignatures;
+        mapping(bytes32 => bool) executedCrossChainActions;
+        uint256 crossChainExecutionFee; // Fee for cross-chain execution
+        mapping(uint256 => uint256) chainWeights; // Weight of each chain in governance
+        bool enableCrossChainVoting; // Allow voting across chains
+        mapping(bytes32 => uint256) messageNonce; // Prevent replay attacks
+        uint256 maxChainDelay; // Maximum delay between chains
     }
     
-    // Decentralized Identity & Reputation
-    struct DecentralizedIdentity {
-        uint256 identityId;
-        bytes32 didHash; // Decentralized Identifier hash
-        mapping(string => bytes32) verifiableCredentials;
-        mapping(address => bool) trustedIssuers;
-        uint256 reputationScore;
-        mapping(string => uint256) skillCertifications;
-        mapping(address => uint256) peerEndorsements;
-        bool isSelfSovereign; // Self-sovereign identity
-        bytes32 publicKeyHash; // Public key for identity verification
-        mapping(bytes32 => uint256) credentialExpiry;
-        uint256 identityLevel; // Identity verification level
-        mapping(string => bool) socialRecovery; // Social recovery guardians
-        address[] recoveryGuardians;
-        uint256 recoveryThreshold; // Required guardians for recovery
-        mapping(bytes32 => bool) revokedCredentials;
-        bool isPrivacyPreserving; // Privacy-preserving identity
-        bytes32 zkIdentityProof; // Zero-knowledge identity proof
-    }
-    
-    // Sustainable & ESG Governance
-    struct ESGGovernance {
-        uint256 esgId;
-        uint256 carbonFootprint; // Total carbon footprint
-        mapping(uint256 => uint256) proposalCarbonImpact;
-        uint256 sustainabilityScore; // Overall sustainability rating
-        mapping(string => uint256) esgMetrics; // Environmental, Social, Governance metrics
-        uint256 renewableEnergyUsage; // Percentage renewable energy
-        mapping(address => uint256) memberCarbonCredits;
-        uint256 carbonOffsetGoal; // Carbon neutrality goal
-        mapping(uint256 => bool) sustainableProposals; // ESG-compliant proposals
-        uint256 socialImpactScore; // Social impact measurement
-        mapping(string => uint256) diversityMetrics; // Diversity & inclusion metrics
-        bool isNetZero; // Net-zero commitment
-        mapping(address => uint256) esgReputations; // ESG reputation scores
-        uint256 sustainabilityBond; // Green bond issuance
-        mapping(uint256 => uint256) impactMeasurement; // Impact measurement
-        address[] esgAuditors; // ESG auditing partners
-    }
-    
-    // Advanced Treasury Management
-    struct AdvancedTreasury {
-        uint256 treasuryId;
-        mapping(address => uint256) assetBalances;
-        mapping(address => uint256) yieldGenerated;
-        uint256 totalAUM; // Assets Under Management
-        mapping(string => uint256) investmentStrategies;
-        uint256 riskBudget; // Risk budget allocation
-        mapping(address => uint256) protocolAllocations; // DeFi protocol allocations
-        uint256 liquidityReserve; // Emergency liquidity reserve
-        mapping(address => uint256) stakingRewards;
-        uint256 treasuryYield; // Overall treasury yield
-        mapping(uint256 => uint256) performanceHistory;
-        bool enableAutoCompounding; // Automatic reward compounding
-        mapping(address => bool) approvedStrategies; // Approved yield strategies
-        uint256 maxRiskExposure; // Maximum risk exposure
-        mapping(string => uint256) sectorAllocations;
-        uint256 treasuryInsurance; // Treasury insurance coverage
-        address treasuryManager; // Automated treasury manager
-    }
-    
-    // Gamification & Engagement Engine
-    struct GamificationEngine {
+    // Advanced Treasury Yield Optimization
+    struct YieldOptimizationEngine {
         uint256 engineId;
-        mapping(address => uint256) experiencePoints;
-        mapping(address => uint256) memberLevel;
-        mapping(address => mapping(string => bool)) achievements;
-        mapping(string => uint256) achievementRewards;
-        mapping(address => uint256) streakDays; // Participation streak
-        mapping(address => uint256) contributionScore;
-        uint256 seasonNumber; // Current gamification season
-        mapping(uint256 => mapping(address => uint256)) seasonLeaderboard;
-        mapping(address => string[]) unlockedBadges;
-        mapping(string => uint256) badgeRequirements;
-        uint256 maxLevel; // Maximum achievable level
-        mapping(uint256 => uint256) levelRequirements; // XP required per level
-        mapping(address => uint256) socialScore; // Social engagement score
-        mapping(address => uint256) innovationPoints; // Innovation contribution points
-        bool enabledCompetitions; // Enable competitions
-        mapping(uint256 => uint256) competitionRewards;
+        mapping(address => uint256) yieldStrategies; // Strategy ID per token
+        mapping(uint256 => string) strategyNames; // Strategy descriptions
+        mapping(uint256 => uint256) strategyRisk; // Risk level 1-10
+        mapping(uint256 => uint256) expectedAPY; // Expected annual percentage yield
+        mapping(address => uint256) currentYield; // Current yield per token
+        mapping(uint256 => address[]) strategyProtocols; // DeFi protocols in strategy
+        mapping(address => uint256) protocolAllocation; // Allocation per protocol
+        bool enableAutoRebalancing; // Automatic rebalancing
+        uint256 rebalanceThreshold; // Threshold to trigger rebalancing
+        mapping(address => uint256) impermanentLossProtection; // IL protection per token
+        uint256 totalYieldGenerated; // Total yield generated
+        mapping(uint256 => uint256) strategyPerformance; // Historical performance
+        mapping(address => bool) approvedProtocols; // Approved DeFi protocols
+        uint256 maxRiskExposure; // Maximum risk exposure per strategy
+        mapping(uint256 => uint256) strategyLiquidity; // Liquidity score per strategy
+        bool enableFlashLoans; // Enable flash loan arbitrage
+        mapping(address => uint256) yieldHarvested; // Yield harvested per member
     }
     
-    // Dynamic NFT Membership Evolution
-    struct DynamicNFTMembership {
-        uint256 tokenId;
-        uint256 evolutionStage; // Current evolution stage
-        mapping(string => uint256) traits; // Dynamic traits
-        mapping(uint256 => string) evolutionHistory;
-        uint256 lastEvolution; // Last evolution timestamp
-        mapping(string => bool) unlockedFeatures;
-        uint256 rarityScore; // NFT rarity score
-        mapping(address => bool) collaboratorBadges;
-        uint256 utilityScore; // Utility token score
-        mapping(string => bytes32) metadata; // Dynamic metadata
-        bool isEvolutionary; // Can evolve over time
-        mapping(uint256 => uint256) evolutionCosts; // Cost to evolve
-        uint256 maxEvolutions; // Maximum evolution stages
-        mapping(string => uint256) skillTrees; // Skill tree progression
-        uint256 prestigeLevel; // Prestige level for advanced members
-        mapping(uint256 => string) customization; // NFT customization options
+    // Reputation-Based Voting Power
+    struct ReputationSystem {
+        uint256 systemId;
+        mapping(address => uint256) baseReputation; // Base reputation score
+        mapping(address => mapping(string => uint256)) categoryReputation; // Category-specific reputation
+        mapping(address => uint256) reputationDecay; // Reputation decay rate
+        mapping(address => uint256) lastActivity; // Last activity timestamp
+        mapping(address => uint256) reputationMultiplier; // Voting power multiplier
+        mapping(string => uint256) categoryWeights; // Weight of each category
+        mapping(address => mapping(address => int256)) peerRatings; // Peer-to-peer ratings
+        mapping(address => uint256) contributionScore; // Contribution to DAO
+        mapping(address => uint256) consistencyScore; // Voting consistency
+        uint256 maxReputation; // Maximum reputation cap
+        uint256 minReputation; // Minimum reputation floor
+        bool enableReputationVoting; // Use reputation for voting power
+        mapping(address => uint256) reputationStake; // Staked reputation
+        mapping(uint256 => mapping(address => uint256)) proposalReputationRisk; // Reputation at risk per proposal
+        uint256 reputationRecoveryRate; // Rate of reputation recovery
+        mapping(address => bool) reputationSlashed; // Slashed reputation status
+        mapping(address => string[]) achievements; // Member achievements
+    }
+    
+    // Automated Compliance & Legal Framework
+    struct ComplianceFramework {
+        uint256 frameworkId;
+        mapping(string => bool) jurisdictionCompliance; // Compliance per jurisdiction
+        mapping(uint256 => string[]) proposalLegalReview; // Legal review comments
+        mapping(address => string) memberJurisdiction; // Member jurisdiction
+        mapping(string => mapping(string => bool)) regulatoryRequirements; // Requirements per jurisdiction
+        mapping(uint256 => bool) proposalLegalApproval; // Legal approval status
+        address[] legalAdvisors; // Legal advisory panel
+        mapping(address => bool) advisorStatus;
+        mapping(string => uint256) complianceCosts; // Compliance costs per jurisdiction
+        mapping(uint256 => bytes32) legalDocuments; // Legal document hashes
+        bool enableAutomatedCompliance; // Automated compliance checking
+        mapping(bytes32 => bool) complianceRules; // Automated compliance rules
+        mapping(address => bool) accreditedInvestor; // Accredited investor status
+        mapping(string => uint256) regulatoryLimits; // Regulatory limits per jurisdiction
+        mapping(uint256 => string) complianceStatus; // Compliance status per proposal
+        uint256 legalReviewTimeout; // Timeout for legal review
+        mapping(address => mapping(string => bool)) certifications; // Member certifications
+        bool enableKYC; // Know Your Customer requirements
+    }
+    
+    // Dynamic Tokenomics Engine
+    struct DynamicTokenomics {
+        uint256 tokenomicsId;
+        uint256 totalSupply;
+        uint256 circulatingSupply;
+        mapping(address => uint256) stakingRewards; // Staking rewards per member
+        mapping(address => uint256) stakingDuration; // Staking duration per member
+        mapping(uint256 => uint256) stakingTiers; // Staking tiers with different rewards
+        uint256 inflationRate; // Token inflation rate
+        uint256 deflationRate; // Token deflation rate (burn rate)
+        mapping(address => uint256) burnedTokens; // Burned tokens per member
+        mapping(string => uint256) utilityUsage; // Token utility usage tracking
+        bool enableDynamicSupply; // Dynamic supply adjustment
+        mapping(uint256 => uint256) supplyAdjustmentHistory; // Supply adjustment history
+        uint256 targetPrice; // Target token price
+        mapping(address => bool) whitelistedBurners; // Authorized token burners
+        mapping(uint256 => uint256) stakingAPY; // APY per staking tier
+        uint256 maxStakingDuration; // Maximum staking duration
+        mapping(address => uint256) vestingSchedule; // Token vesting schedule
+        bool enableBuyback; // Token buyback mechanism
+        uint256 buybackThreshold; // Threshold for buyback activation
+        mapping(address => uint256) loyaltyRewards; // Loyalty rewards for long-term holders
+    }
+    
+    // AI-Powered Risk Assessment
+    struct RiskAssessmentAI {
+        uint256 assessmentId;
+        mapping(uint256 => uint256) proposalRiskScore; // Risk score per proposal (0-100)
+        mapping(address => uint256) memberRiskProfile; // Member risk profile
+        mapping(string => uint256) riskFactors; // Risk factor weights
+        mapping(uint256 => string[]) identifiedRisks; // Identified risks per proposal
+        mapping(uint256 => uint256) riskMitigation; // Risk mitigation score
+        mapping(address => uint256) riskTolerance; // Member risk tolerance
+        bool enableAIRiskAssessment; // AI-powered risk assessment
+        mapping(bytes32 => uint256) riskModelAccuracy; // Risk model accuracy
+        mapping(uint256 => uint256) historicalRiskAccuracy; // Historical accuracy tracking
+        mapping(address => mapping(string => uint256)) riskExposure; // Risk exposure per category
+        uint256 maxAcceptableRisk; // Maximum acceptable risk level
+        mapping(uint256 => bool) riskApproved; // Risk approval status
+        mapping(address => bool) riskValidators; // Authorized risk validators
+        mapping(uint256 => uint256) riskInsurance; // Risk insurance coverage
+        uint256 riskAssessmentFee; // Fee for risk assessment
+        mapping(string => uint256) riskScenarios; // Risk scenario modeling
+        bool enableStressTestinng; // Enable stress testing
     }
     
     // ============ NEW STATE VARIABLES ============
     
-    mapping(uint256 => QuantumGovernance) public quantumGovernance;
-    mapping(uint256 => PredictiveAnalytics) public predictiveModels;
-    mapping(uint256 => AutonomousFunding) public autonomousFunds;
-    mapping(uint256 => ZKPrivacyLayer) public privacyLayers;
-    mapping(uint256 => ConsensusEngine) public consensusEngines;
-    mapping(uint256 => OracleNetwork) public oracleNetworks;
-    mapping(uint256 => BridgeManager) public bridgeManagers;
-    mapping(address => DecentralizedIdentity) public decentralizedIdentities;
-    mapping(uint256 => ESGGovernance) public esgGovernance;
-    mapping(uint256 => AdvancedTreasury) public advancedTreasuries;
-    mapping(uint256 => GamificationEngine) public gamificationEngines;
-    mapping(uint256 => DynamicNFTMembership) public dynamicNFTs;
-    
-    // Extended mappings
-    mapping(address => uint256) public quantumSecurityLevel;
-    mapping(address => bytes32) public memberDID; // Decentralized Identifiers
-    mapping(uint256 => uint256) public proposalCarbonScore;
-    mapping(address => uint256) public esgReputation;
-    mapping(address => mapping(string => uint256)) public skillEndorsements;
-    mapping(address => uint256[]) public memberAchievements;
-    mapping(bytes32 => bool) public processedQuantumProofs;
-    mapping(address => uint256) public memberExperiencePoints;
-    mapping(uint256 => address[]) public evolutionWitnesses;
-    
-    // New counters and configurations
-    uint256 public quantumModuleCount;
-    uint256 public predictiveModelCount;
-    uint256 public autonomousFundCount;
-    uint256 public privacyLayerCount;
-    uint256 public consensusEngineCount;
-    uint256 public oracleNetworkCount;
-    uint256 public bridgeManagerCount;
-    uint256 public esgGovernanceCount;
-    uint256 public treasuryCount;
-    uint256 public gamificationEngineCount;
-    
-    // Advanced configuration
-    struct UltraAdvancedConfig {
-        bool enableQuantumSecurity;
-        bool enablePredictiveAnalytics;
-        bool enableAutonomousFunding;
-        bool enableZKPrivacy;
-        bool enableDynamicConsensus;
-        bool enableAdvancedOracles;
-        bool enableInteroperability;
-        bool enableESGGovernance;
-        bool enableGamification;
-        bool enableDynamicNFTs;
-        uint256 quantumSecurityThreshold;
-        uint256 mlAccuracyThreshold;
-        uint256 privacyLevel;
-        uint256 consensusTimeout;
-        uint256 oracleReliabilityThreshold;
-        uint256 bridgeSecurityDelay;
-        uint256 esgComplianceThreshold;
-        uint256 gamificationRewardPool;
+    // Core DAO structures
+    struct Proposal {
+        uint256 id;
+        string title;
+        string description;
+        address proposer;
+        uint256 votesFor;
+        uint256 votesAgainst;
+        uint256 startTime;
+        uint256 endTime;
+        bool executed;
+        bool exists;
+        bytes32 ipfsHash;
+        uint256 requiredQuorum;
+        mapping(address => bool) hasVoted;
+        mapping(address => uint256) voteWeight;
     }
     
-    UltraAdvancedConfig public ultraConfig;
-    
-    // ============ EXTENDED EVENTS ============
-    
-    event QuantumSecurityEnabled(uint256 indexed moduleId, uint256 securityLevel);
-    event PredictiveModelTrained(uint256 indexed modelId, uint256 accuracy, string modelType);
-    event AutonomousFundCreated(uint256 indexed fundId, string strategy, uint256 initialFunding);
-    event ZKProofVerified(address indexed member, bytes32 proofHash, bool isValid);
-    event ConsensusEngineDeployed(uint256 indexed engineId, string consensusType);
-    event OracleDataUpdated(uint256 indexed oracleId, string dataType, uint256 value);
-    event CrossChainBridgeExecuted(uint256 indexed bridgeId, uint256 sourceChain, uint256 targetChain);
-    event IdentityVerified(address indexed member, bytes32 didHash, uint256 reputationScore);
-    event ESGScoreUpdated(uint256 indexed proposalId, uint256 carbonImpact, uint256 sustainabilityScore);
-    event TreasuryOptimizationCompleted(uint256 indexed treasuryId, uint256 newYield, uint256 riskScore);
-    event AchievementUnlocked(address indexed member, string achievement, uint256 rewardAmount);
-    event NFTEvolutionCompleted(uint256 indexed tokenId, uint256 newStage, string[] newTraits);
-    event QuantumVoteCast(uint256 indexed proposalId, bytes32 quantumCommitment);
-    event PredictionAccuracyUpdated(uint256 indexed modelId, uint256 newAccuracy);
-    event ESGAuditCompleted(uint256 indexed proposalId, bool isCompliant, uint256 score);
-    
-    // ============ ADVANCED FUNCTIONS ============
-    
-    /**
-     * @dev Initialize quantum governance module
-     */
-    function initializeQuantumGovernance(
-        uint256 _securityLevel,
-        address _quantumOracle,
-        bool _enablePostQuantum
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        uint256 moduleId = quantumModuleCount++;
-        QuantumGovernance storage qg = quantumGovernance[moduleId];
-        qg.moduleId = moduleId;
-        qg.latticeSecurityLevel = _securityLevel;
-        qg.quantumOracle = _quantumOracle;
-        qg.postQuantumEnabled = _enablePostQuantum;
-        qg.isQuantumSecure = true;
-        
-        emit QuantumSecurityEnabled(moduleId, _securityLevel);
+    struct Member {
+        address memberAddress;
+        uint256 joinDate;
+        uint256 votingPower;
+        uint256 reputationScore;
+        bool isActive;
+        string[] expertiseAreas;
+        uint256 contributionScore;
+        uint256 lastActiveTime;
     }
     
-    /**
-     * @dev Cast quantum-resistant vote
-     */
-    function castQuantumVote(
-        uint256 _proposalId,
-        uint256 _moduleId,
-        bytes32 _quantumCommitment,
-        bytes memory _quantumSignature
-    ) external onlyMember {
-        require(_moduleId < quantumModuleCount, "Invalid quantum module");
+    // Core mappings
+    mapping(uint256 => Proposal) public proposals;
+    mapping(address => Member) public members;
+    mapping(address => bool) public isMember;
+    
+    // Advanced system mappings
+    mapping(uint256 => SentimentAnalysisEngine) public sentimentEngines;
+    mapping(uint256 => LiquidDemocracy) public liquidDemocracySystems;
+    mapping(uint256 => ProposalLifecycle) public proposalLifecycles;
+    mapping(uint256 => ArbitrationSystem) public arbitrationSystems;
+    mapping(uint256 => MultiChainGovernance) public multiChainGovernance;
+    mapping(uint256 => YieldOptimizationEngine) public yieldEngines;
+    mapping(uint256 => ReputationSystem) public reputationSystems;
+    mapping(uint256 => ComplianceFramework) public complianceFrameworks;
+    mapping(uint256 => DynamicTokenomics) public dynamicTokenomics;
+    mapping(uint256 => RiskAssessmentAI) public riskAssessmentAI;
+    
+    // System counters
+    uint256 public proposalCount;
+    uint256 public memberCount;
+    uint256 public sentimentEngineCount;
+    uint256 public liquidDemocracyCount;
+    uint256 public arbitrationSystemCount;
+    uint256 public multiChainGovernanceCount;
+    uint256 public yieldEngineCount;
+    uint256 public reputationSystemCount;
+    uint256 public complianceFrameworkCount;
+    uint256 public tokenomicsCount;
+    uint256 public riskAssessmentCount;
+    
+    // Configuration
+    struct DAOConfig {
+        uint256 minProposalThreshold; // Minimum tokens to create proposal
+        uint256 votingPeriod; // Voting period in seconds
+        uint256 quorumThreshold; // Minimum participation for valid vote
+        uint256 passingThreshold; // Minimum votes to pass proposal
+        bool enableLiquidDemocracy;
+        bool enableSentimentAnalysis;
+        bool enableRiskAssessment;
+        bool enableMultiChain;
+        bool enableArbitration;
+        uint256 membershipFee;
+        uint256 proposalFee;
+        address treasuryAddress;
+    }
+    
+    DAOConfig public daoConfig;
+    
+    // ============ EVENTS ============
+    
+    event ProposalCreated(uint256 indexed proposalId, address indexed proposer, string title);
+    event VoteCast(uint256 indexed proposalId, address indexed voter, bool support, uint256 weight);
+    event ProposalExecuted(uint256 indexed proposalId, bool success);
+    event MemberJoined(address indexed member, uint256 tokenId);
+    event MemberSlashed(address indexed member, uint256 amount, string reason);
+    event SentimentAnalyzed(uint256 indexed proposalId, int256 sentiment, uint256 confidence);
+    event DelegationUpdated(address indexed delegator, address indexed delegate, string category);
+    event DisputeCreated(uint256 indexed disputeId, address indexed plaintiff, address indexed defendant);
+    event DisputeResolved(uint256 indexed disputeId, address indexed winner, uint256 compensation);
+    event CrossChainProposalSynced(uint256 indexed proposalId, uint256 indexed chainId);
+    event YieldHarvested(address indexed member, uint256 amount, uint256 strategyId);
+    event ReputationUpdated(address indexed member, uint256 newReputation, string category);
+    event ComplianceChecked(uint256 indexed proposalId, string jurisdiction, bool compliant);
+    event TokenomicsAdjusted(uint256 newInflationRate, uint256 newDeflationRate);
+    event RiskAssessed(uint256 indexed proposalId, uint256 riskScore, string[] risks);
+    
+    // ============ MODIFIERS ============
+    
+    modifier onlyMember() {
+        require(isMember[msg.sender], "Not a DAO member");
+        _;
+    }
+    
+    modifier onlyActiveMember() {
+        require(isMember[msg.sender] && members[msg.sender].isActive, "Not an active member");
+        _;
+    }
+    
+    modifier proposalExists(uint256 _proposalId) {
         require(proposals[_proposalId].exists, "Proposal does not exist");
-        
-        QuantumGovernance storage qg = quantumGovernance[_moduleId];
-        require(qg.isQuantumSecure, "Quantum security not enabled");
-        
-        // Verify quantum signature (simplified - implement actual post-quantum verification)
-        bytes32 messageHash = keccak256(abi.encodePacked(_proposalId, msg.sender, _quantumCommitment));
-        require(_verifyQuantumSignature(messageHash, _quantumSignature, msg.sender), "Invalid quantum signature");
-        
-        // Store quantum vote commitment
-        qg.quantumVoteCommitments[_proposalId] = _quantumCommitment;
-        qg.quantumSignatures[msg.sender] = keccak256(_quantumSignature);
-        qg.quantumNonce[msg.sender]++;
-        
-        emit QuantumVoteCast(_proposalId, _quantumCommitment);
+        _;
     }
     
-    /**
-     * @dev Deploy predictive analytics model
-     */
-    function deployPredictiveModel(
-        string memory _modelType,
-        bytes32 _modelHash,
-        uint256 _initialAccuracy,
-        bool _enableAutoRetraining
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        uint256 modelId = predictiveModelCount++;
-        PredictiveAnalytics storage model = predictiveModels[modelId];
-        model.modelId = modelId;
-        model.modelType = _modelType;
-        model.modelHash = _modelHash;
-        model.accuracy = _initialAccuracy;
-        model.isAutoRetraining = _enableAutoRetraining;
-        model.lastTraining = block.timestamp;
-        model.predictionConfidence = 95; // 95% confidence interval
-        
-        emit PredictiveModelTrained(modelId, _initialAccuracy, _modelType);
+    modifier votingActive(uint256 _proposalId) {
+        require(
+            block.timestamp >= proposals[_proposalId].startTime &&
+            block.timestamp <= proposals[_proposalId].endTime,
+            "Voting period not active"
+        );
+        _;
     }
     
-    /**
-     * @dev Get ML prediction for proposal success
-     */
-    function getPredictionForProposal(
+    // ============ CONSTRUCTOR ============
+    
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        address _treasuryAddress
+    ) ERC721(_name, _symbol) {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(ADMIN_ROLE, msg.sender);
+        
+        daoConfig = DAOConfig({
+            minProposalThreshold: 1000 * 10**18, // 1000 tokens
+            votingPeriod: 7 days,
+            quorumThreshold: 10, // 10%
+            passingThreshold: 51, // 51%
+            enableLiquidDemocracy: true,
+            enableSentimentAnalysis: true,
+            enableRiskAssessment: true,
+            enableMultiChain: false,
+            enableArbitration: true,
+            membershipFee: 0.1 ether,
+            proposalFee: 0.01 ether,
+            treasuryAddress: _treasuryAddress
+        });
+    }
+    
+    // ============ MEMBERSHIP FUNCTIONS ============
+    
+    function joinDAO() external payable nonReentrant {
+        require(msg.value >= daoConfig.membershipFee, "Insufficient membership fee");
+        require(!isMember[msg.sender], "Already a member");
+        
+        uint256 tokenId = memberCount++;
+        _safeMint(msg.sender, tokenId);
+        
+        members[msg.sender] = Member({
+            memberAddress: msg.sender,
+            joinDate: block.timestamp,
+            votingPower: 1,
+            reputationScore: 100, // Starting reputation
+            isActive: true,
+            expertiseAreas: new string[](0),
+            contributionScore: 0,
+            lastActiveTime: block.timestamp
+        });
+        
+        isMember[msg.sender] = true;
+        
+        // Send membership fee to treasury
+        payable(daoConfig.treasuryAddress).transfer(msg.value);
+        
+        emit MemberJoined(msg.sender, tokenId);
+    }
+    
+    function updateExpertise(string[] memory _expertiseAreas) external onlyMember {
+        members[msg.sender].expertiseAreas = _expertiseAreas;
+        members[msg.sender].lastActiveTime = block.timestamp;
+    }
+    
+    // ============ PROPOSAL FUNCTIONS ============
+    
+    function createProposal(
+        string memory _title,
+        string memory _description,
+        bytes32 _ipfsHash,
+        uint256 _customVotingPeriod
+    ) external payable onlyActiveMember nonReentrant {
+        require(msg.value >= daoConfig.proposalFee, "Insufficient proposal fee");
+        require(bytes(_title).length > 0, "Title cannot be empty");
+        require(bytes(_description).length > 0, "Description cannot be empty");
+        
+        uint256 proposalId = proposalCount++;
+        uint256 votingPeriod = _customVotingPeriod > 0 ? _customVotingPeriod : daoConfig.votingPeriod;
+        
+        proposals[proposalId] = Proposal({
+            id: proposalId,
+            title: _title,
+            description: _description,
+            proposer: msg.sender,
+            votesFor: 0,
+            votesAgainst: 0,
+            startTime: block.timestamp,
+            endTime: block.timestamp + votingPeriod,
+            executed: false,
+            exists: true,
+            ipfsHash: _ipfsHash,
+            requiredQuorum: daoConfig.quorumThreshold
+        });
+        
+        // Initialize proposal lifecycle
+        _initializeProposalLifecycle(proposalId);
+        
+        // Perform risk assessment if enabled
+        if (daoConfig.enableRiskAssessment) {
+            _performRiskAssessment(proposalId);
+        }
+        
+        // Analyze sentiment if enabled
+        if (daoConfig.enableSentimentAnalysis) {
+            _analyzeSentiment(proposalId, _description);
+        }
+        
+        // Send proposal fee to treasury
+        payable(daoConfig.treasuryAddress).transfer(msg.value);
+        
+        emit ProposalCreated(proposalId, msg.sender, _title);
+    }
+    
+    function vote(
         uint256 _proposalId,
-        uint256 _modelId
-    ) external view returns (uint256 successProbability, uint256 confidence) {
-        require(_modelId < predictiveModelCount, "Invalid model ID");
+        bool _support
+    ) external onlyActiveMember proposalExists(_proposalId) votingActive(_proposalId) {
+        require(!proposals[_proposalId].hasVoted[msg.sender], "Already voted");
         
-        PredictiveAnalytics storage model = predictiveModels[_modelId];
-        successProbability = model.proposalSuccessProbability[_proposalId];
-        confidence = model.predictionConfidence;
+        Proposal storage proposal = proposals[_proposalId];
+        uint256 weight = _calculateVotingWeight(msg.sender, _proposalId);
         
-        // If no prediction exists, calculate based on historical data
-        if (successProbability == 0) {
-            successProbability = _calculatePredictiveScore(_proposalId, _modelId);
-        }
-    }
-    
-    /**
-     * @dev Create autonomous funding strategy
-     */
-    function createAutonomousFunding(
-        string memory _strategy,
-        address[] memory _assets,
-        uint256[] memory _weights,
-        uint256 _performanceTarget,
-        uint256 _maxDrawdown
-    ) external payable onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(msg.value > 0, "Must provide initial funding");
-        require(_assets.length == _weights.length, "Assets and weights length mismatch");
+        proposal.hasVoted[msg.sender] = true;
+        proposal.voteWeight[msg.sender] = weight;
         
-        uint256 fundId = autonomousFundCount++;
-        AutonomousFunding storage fund = autonomousFunds[fundId];
-        fund.fundId = fundId;
-        fund.fundStrategy = _strategy;
-        fund.totalFunds = msg.value;
-        fund.performanceTarget = _performanceTarget;
-        fund.maxDrawdown = _maxDrawdown;
-        fund.enabledYieldFarming = true;
-        fund.liquidityRatio = 20; // 20% liquidity requirement
-        
-        // Set asset weights
-        for (uint256 i = 0; i < _assets.length; i++) {
-            fund.assetWeights[_assets[i]] = _weights[i];
+        if (_support) {
+            proposal.votesFor += weight;
+        } else {
+            proposal.votesAgainst += weight;
         }
         
-        emit AutonomousFundCreated(fundId, _strategy, msg.value);
+        // Update member activity
+        members[msg.sender].lastActiveTime = block.timestamp;
+        members[msg.sender].contributionScore += 1;
+        
+        emit VoteCast(_proposalId, msg.sender, _support, weight);
     }
     
-    /**
-     * @dev Initialize ZK privacy layer
-     */
-    function initializeZKPrivacy(
-        bytes32 _merkleRoot,
-        address _zkVerifier,
-        uint256 _privacyLevel,
-        uint256 _anonymitySetSize
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        uint256 privacyId = privacyLayerCount++;
-        ZKPrivacyLayer storage zkLayer = privacyLayers[privacyId];
-        zkLayer.privacyId = privacyId;
-        zkLayer.merkleRoot = _merkleRoot;
-        zkLayer.zkVerifier = _zkVerifier;
-        zkLayer.privacyLevel = _privacyLevel;
-        zkLayer.anonymitySet = _anonymitySetSize;
-        zkLayer.isPrivateVoting = true;
-        zkLayer.enabledShielded = true;
+    function executeProposal(uint256 _proposalId) external proposalExists(_proposalId) nonReentrant {
+        Proposal storage proposal = proposals[_proposalId];
+        require(block.timestamp > proposal.endTime, "Voting still active");
+        require(!proposal.executed, "Already executed");
         
-        // Generate shared voting key (simplified)
-        zkLayer.votingKey = keccak256(abi.encodePacked(block.timestamp, _merkleRoot));
-    }
-    
-    /**
-     * @dev Cast private vote using ZK proof
-     */
-    function castPrivateVote(
-        uint256 _proposalId,
-        uint256 _privacyId,
-        bytes32 _nullifierHash,
-        bytes memory _zkProof,
-        bytes32 _encryptedVote
-    ) external {
-        require(_privacyId < privacyLayerCount, "Invalid privacy layer");
-        require(proposals[_proposalId].exists, "Proposal does not exist");
+        uint256 totalVotes = proposal.votesFor + proposal.votesAgainst;
+        uint256 totalMembers = memberCount;
+        uint256 quorumReached = (totalVotes * 100) / totalMembers;
         
-        ZKPrivacyLayer storage zkLayer = privacyLayers[_privacyId];
-        require(!zkLayer.nullifierHashes[_nullifierHash], "Vote already cast");
+        require(quorumReached >= proposal.requiredQuorum, "Quorum not reached");
         
-        // Verify ZK proof (simplified - implement actual ZK verification)
-        require(_verifyZKProof(_zkProof, zkLayer.zkVerifier), "Invalid ZK proof");
+        bool passed = (proposal.votesFor * 100) / totalVotes >= daoConfig.passingThreshold;
+        proposal.executed = true;
         
-        // Store encrypted vote and nullifier
-        zkLayer.encryptedVotes[_proposalId] = _encryptedVote;
-        zkLayer.nullifierHashes[_nullifierHash] = true;
-        zkLayer.privateVoteCommitments[msg.sender] = keccak256(_encryptedVote);
-        
-        emit ZKProofVerified(msg.sender, keccak256(_zkProof), true);
-    }
-    
-    /**
-     * @dev Create dynamic consensus engine
-     */
-    function createConsensusEngine(
-        string memory _consensusType,
-        uint256 _blockTime,
-        uint256 _epochLength,
-        uint256 _minStake,
-        uint256 _maxValidators
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        uint256 engineId = consensusEngineCount++;
-        ConsensusEngine storage engine = consensusEngines[engineId];
-        engine.engineId = engineId;
-        engine.consensusType = _consensusType;
-        engine.blockTime = _blockTime;
-        engine.epochLength = _epochLength;
-        engine.minStake = _minStake;
-        engine.maxValidators = _maxValidators;
-        engine.slashingRate = 5; // 5% slashing rate
-        engine.isByzantineFaultTolerant = true;
-        engine.finalizationThreshold = 67; // 67% for finality
-        
-        emit ConsensusEngineDeployed(engineId, _consensusType);
-    }
-    
-    /**
-     * @dev Become validator in consensus engine
-     */
-    function becomeValidator(uint256 _engineId) external payable onlyMember {
-        require(_engineId < consensusEngineCount, "Invalid consensus engine");
-        
-        ConsensusEngine storage engine = consensusEngines[_engineId];
-        require(msg.value >= engine.minStake, "Insufficient stake");
-        require(engine.activeValidators.length < engine.maxValidators, "Maximum validators reached");
-        require(engine.validatorStakes[msg.sender] == 0, "Already a validator");
-        
-        engine.validatorStakes[msg.sender] = msg.value;
-        engine.activeValidators.push(msg.sender);
-        engine.totalStaked += msg.value;
-        engine.validatorReputation[msg.sender] = 100; // Initial reputation
-    }
-    
-    /**
-     * @dev Create oracle network
-     */
-    function createOracleNetwork(
-        address[] memory _oracles,
-        uint256 _aggregationMethod,
-        uint256 _deviationThreshold,
-        uint256 _minimumOracles
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        uint256 oracleId = oracleNetworkCount++;
-        OracleNetwork storage network = oracleNetworks[oracleId];
-        network.oracleId = oracleId;
-        network.oracles = _oracles;
-        network.aggregationMethod = _aggregationMethod;
-        network.deviationThreshold = _deviationThreshold;
-        network.minimumOracles = _minimumOracles;
-        network.isDecentralized = true;
-        network.disputePeriod = 1 hours;
-        network.updateFrequency = 300; // 5 minutes
-        
-        // Initialize oracle reputations
-        for (uint256 i = 0; i < _oracles.length; i++) {
-            network.oracleReputations[_oracles[i]] = 100;
-            network.authorizedOracles[_oracles[i]] = true;
-        }
-    }
-    
-    /**
-     * @dev Update oracle data feed
-     */
-    function updateOracleData(
-        uint256 _oracleId,
-        string memory _dataType,
-        uint256 _value,
-        bytes memory _signature
-    ) external {
-        require(_oracleId < oracleNetworkCount, "Invalid oracle network");
-        
-        OracleNetwork storage network = oracleNetworks[_oracleId];
-        require(network.authorizedOracles[msg.sender], "Not authorized oracle");
-        
-        // Verify oracle signature (simplified)
-        bytes32 messageHash = keccak256(abi.encodePacked(_dataType, _value, block.timestamp));
-        require(_verifyOracleSignature(messageHash, _signature, msg.sender), "Invalid signature");
-        
-        // Check deviation from existing data
-        uint256 currentValue = network.dataFeeds[_dataType];
-        if (currentValue > 0) {
-            uint256 deviation = currentValue > _value ? 
-                ((currentValue - _value) * 100) / currentValue :
-                ((_value - currentValue) * 100) / currentValue;
+        if (passed) {
+            // Update proposal lifecycle
+            _progressProposalStage(_proposalId, ProposalLifecycle.ProposalStage.Implementation);
             
-            require(deviation <= network.deviationThreshold, "Value deviation too high");
+            // Update reputation for supporters
+            _updateReputationForVote(_proposalId, true);
+        } else {
+            _progressProposalStage(_proposalId, ProposalLifecycle.ProposalStage.Cancelled);
+            
+            // Update reputation for opponents
+            _updateReputationForVote(_proposalId, false);
         }
         
-        network.dataFeeds[_dataType] = _value;
-        network.dataQuality[_dataType] = _calculateDataQuality(_oracleId, _dataType);
-        
-        emit OracleDataUpdated(_oracleId, _dataType, _value);
+        emit ProposalExecuted(_proposalId, passed);
     }
     
-    /**
-     * @dev Create bridge manager for interoperability
-     */
-    function createBridgeManager(
-        uint256[] memory _supportedChains,
-        address[] memory _validators,
-        uint256 _requiredValidations,
-        uint256 _bridgeFee
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        uint256 bridgeId = bridgeManagerCount++;
-        BridgeManager storage bridge = bridgeManagers[bridgeId];
-        bridge.bridgeId = bridgeId;
-        bridge.validators = _validators;
-        bridge.requiredValidations = _requiredValidations;
-        bridge.bridgeFee = _bridgeFee;
-        bridge.maxBridgeAmount = 1000 ether; // 1000 ETH max
-        bridge.emergencyStop = false;
+    // ============ LIQUID DEMOCRACY FUNCTIONS ============
+    
+    function createLiquidDemocracySystem(
+        uint256 _maxDelegationDepth,
+        uint256 _minDelegationThreshold,
+        bool _enableTopicSpecific
+    ) external onlyRole(ADMIN_ROLE) {
+        uint256 systemId = liquidDemocracyCount++;
+        LiquidDemocracy storage system = liquidDemocracySystems[systemId];
         
-        // Enable supported chains
-        for (uint256 i = 0; i < _supportedChains.length; i++) {
-            bridge.supportedChains[_supportedChains[i]] =
+        system.systemId = systemId;
+        system.maxDelegationDepth = _maxDelegationDepth;
+        system.minDelegationThreshold = _minDelegationThreshold;
+        system.enableTopicSpecificDelegation = _enableTopicSpecific;
+    }
+    
+    function delegateVote(
+        uint256 _systemId,
+        address _delegate,
+        string memory _expertiseArea
+    ) external onlyActiveMember {
+        require(_systemId < liquidDemocracyCount, "Invalid system ID");
+        require(_delegate != msg.sender, "Cannot delegate to self");
+        require(isMember[_delegate], "Delegate must be member");
+        
+        LiquidDemocracy storage system = liquidDemocracySystems[_systemId];
+        
+        if (bytes(_expertiseArea).length > 0) {
+            require(system.enableTopicSpecificDelegation, "Topic-specific delegation not enabled");
+            system.expertDelegations[msg.sender][_expertiseArea] = _delegate;
+        } else {
+            system.delegations[msg.sender] = _delegate;
+        }
+        
+        _updateDelegationChain(_systemId, msg.sender);
+        
+        emit DelegationUpdated(msg.sender, _delegate, _expertiseArea);
+    }
+    
+    function revokeDelegation(uint256 _systemId, string memory _expertiseArea) external onlyActiveMember {
+        LiquidDemocracy storage system = liquidDemocracySystems[_systemId];
+        
+        if (bytes(_expertiseArea).length > 0) {
+            delete system.expertDelegations[msg.sender][_expertiseArea];
+        } else {
+            delete system.delegations[msg.sender];
+        }
+        
+        _updateDelegationChain(_systemId, msg.sender);
+    }
+    
+    // ============ SENTIMENT ANALYSIS FUNCTIONS ============
+    
+    function createSentimentEngine(
+        uint256 _sentimentThreshold,
+        bool _enableRealTime,
+        bool _enableMultiSource
+    ) external onlyRole(ML_OPERATOR_ROLE) {
+        uint256 engineId = sentimentEngineCount++;
+        SentimentAnalysisEngine storage engine = sentimentEngines[engineId];
+        
+        engine.engineId = engineId;
+        engine.sentimentThreshold = _sentimentThreshold;
+        engine.enableRealTimeSentiment = _enableRealTime;
+        engine.enableMultiSourceSentiment = _enableMultiSource;
+        engine.sentimentModelAccuracy = 85; // 85% initial accuracy
+    }
+    
+    function updateSentimentKeywords(
+        uint256 _engineId,
+        string[] memory _keywords,
+        uint256[] memory _weights
+    ) external onlyRole(ML_OPERATOR_ROLE) {
+        require(_keywords.length == _weights.length, "Arrays length mismatch");
+        
+        SentimentAnalysisEngine storage engine = sentimentEngines[_engineId];
+        
+        for (uint256 i = 0; i < _keywords.length; i++) {
+            engine.sentimentKeywords[_keywords[i]] = _weights[i];
+        }
+    }
+    
+    // ============ ARBITRATION FUNCTIONS ============
+    
+    function createArbitrationSystem(
+        uint256 _minArbitrators,
+        uint256 _maxArbitrators,
+        uint256 _arbitrationTimeout
+    ) external onlyRole(ADMIN
+    
+     

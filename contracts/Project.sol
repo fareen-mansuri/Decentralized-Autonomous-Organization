@@ -1,4 +1,4 @@
- // SPDX-License-Identifier: MIT
+  // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -34,348 +34,522 @@ contract UltraEnhancedDAO is ERC721, ReentrancyGuard, AccessControl, Pausable {
     bytes32 public constant COMMUNITY_MODERATOR_ROLE = keccak256("COMMUNITY_MODERATOR_ROLE");
     bytes32 public constant EMERGENCY_COORDINATOR_ROLE = keccak256("EMERGENCY_COORDINATOR_ROLE");
     bytes32 public constant SECURITY_AUDITOR_ROLE = keccak256("SECURITY_AUDITOR_ROLE");
+    bytes32 public constant LIQUIDITY_MANAGER_ROLE = keccak256("LIQUIDITY_MANAGER_ROLE");
+    bytes32 public constant COMPLIANCE_OFFICER_ROLE = keccak256("COMPLIANCE_OFFICER_ROLE");
+    bytes32 public constant RESEARCH_COORDINATOR_ROLE = keccak256("RESEARCH_COORDINATOR_ROLE");
     
     // ============ NEW ADVANCED STRUCTS ============
     
-    // Emergency Response & Crisis Management System
-    struct EmergencyResponseSystem {
+    // Advanced Delegation & Liquid Democracy System
+    struct LiquidDemocracySystem {
         uint256 systemId;
-        mapping(uint256 => EmergencyProposal) emergencyProposals;
-        mapping(address => bool) emergencyCoordinators;
-        mapping(string => uint256) crisisThresholds; // Threshold for different crisis types
-        mapping(uint256 => CrisisLevel) proposalCrisisLevel;
-        uint256 emergencyVotingPeriod; // Shortened voting period for emergencies
-        uint256 emergencyQuorum; // Reduced quorum for emergency decisions
-        mapping(address => uint256) emergencyVotingPower; // Enhanced voting power during emergencies
-        bool systemLockdown; // Complete system lockdown capability
-        mapping(bytes32 => bool) emergencyProtocols; // Pre-approved emergency protocols
-        uint256 lastEmergencyActivation; // Timestamp of last emergency
-        mapping(address => uint256) emergencyResponseRating; // Coordinator performance rating
-        uint256 maxEmergencyDuration; // Maximum duration for emergency state
-        mapping(uint256 => address[]) emergencyResponseTeam; // Dedicated response team per emergency
-        bool enableAutoEmergencyDetection; // AI-powered emergency detection
-        mapping(string => uint256) riskMetrics; // Real-time risk metrics monitoring
-        uint256 emergencyFundAllocation; // Emergency fund allocation percentage
+        mapping(address => address) delegations; // member -> delegate
+        mapping(address => address[]) delegatees; // delegate -> delegatees list
+        mapping(address => mapping(string => address)) topicDelegations; // topic-specific delegations
+        mapping(address => uint256) delegatedVotingPower; // total delegated power
+        mapping(address => bool) acceptingDelegations; // whether accepting new delegations
+        mapping(uint256 => mapping(address => bool)) proposalDelegationOverride; // proposal-specific override
+        mapping(address => uint256) delegationHistory; // number of times delegated
+        mapping(address => uint256) trustScore; // trust score as delegate
+        mapping(address => string[]) expertiseTags; // expertise tags for delegates
+        mapping(string => address[]) expertiseNetwork; // experts per topic
+        uint256 maxDelegationChain; // maximum delegation chain length
+        mapping(address => uint256) delegationRewards; // rewards for good delegation
+        mapping(bytes32 => DelegationSnapshot) delegationSnapshots; // delegation state snapshots
+        bool enableTransitiveDelegation; // allow delegation chains
+        mapping(address => uint256) lastDelegationChange; // timestamp of last change
+        uint256 delegationCooldown; // cooldown period for changing delegations
+        mapping(address => mapping(address => uint256)) delegationWeights; // weighted delegations
     }
     
-    struct EmergencyProposal {
-        uint256 id;
-        string crisisType; // Type of crisis (Security, Financial, Governance, etc.)
-        CrisisLevel severity;
-        address coordinator;
-        uint256 activationTime;
-        uint256 resolution_deadline;
-        bool resolved;
-        string actionPlan; // IPFS hash of action plan
-        mapping(address => bool) coordinatorApproval;
-        uint256 emergencyBudget;
-        address[] affectedSystems; // Systems affected by the emergency
+    struct DelegationSnapshot {
+        bytes32 snapshotId;
+        uint256 timestamp;
+        mapping(address => address) delegationState;
+        mapping(address => uint256) votingPowerState;
     }
     
-    enum CrisisLevel {
-        Low,        // 0 - Minor issues
-        Moderate,   // 1 - Moderate impact
-        High,       // 2 - Significant impact
-        Critical,   // 3 - System-wide impact
-        Catastrophic // 4 - Existential threat
+    // Sophisticated Quadratic Voting & Conviction Voting System
+    struct QuadraticVotingSystem {
+        uint256 systemId;
+        mapping(uint256 => mapping(address => uint256)) quadraticVotes; // proposal -> voter -> credits used
+        mapping(address => uint256) votingCredits; // available voting credits per member
+        mapping(uint256 => uint256) totalQuadraticVotes; // total quadratic votes per proposal
+        mapping(address => uint256) creditsEarned; // credits earned through participation
+        mapping(address => uint256) creditsSpent; // total credits spent
+        uint256 baseCreditsPerPeriod; // base credits allocated per period
+        mapping(uint256 => ConvictionVoting) convictionVotes; // conviction voting per proposal
+        mapping(address => mapping(uint256 => ConvictionState)) memberConviction; // member conviction per proposal
+        uint256 convictionDecayRate; // rate at which conviction decays
+        mapping(uint256 => uint256) convictionThreshold; // threshold for proposal passing
+        bool enableQuadraticVoting; // enable quadratic voting
+        bool enableConvictionVoting; // enable conviction voting
+        mapping(address => uint256) lastCreditRefresh; // last credit refresh timestamp
+        uint256 creditRefreshPeriod; // period for credit refresh
+        mapping(address => uint256) bonusCreditsEarned; // bonus credits for good participation
+        mapping(uint256 => uint256) proposalConvictionScore; // total conviction score per proposal
     }
     
-    // Advanced AI-Powered Proposal Analysis
-    struct AIProposalAnalyzer {
-        uint256 analyzerId;
-        mapping(uint256 => ProposalAnalysis) proposalAnalyses;
-        mapping(string => uint256) analysisModels; // Different AI models for analysis
-        mapping(uint256 => uint256) complexityScore; // Proposal complexity (0-100)
-        mapping(uint256 => uint256) implementationDifficulty; // Implementation difficulty (0-100)
-        mapping(uint256 => string[]) requiredSkills; // Skills needed for implementation
-        mapping(uint256 => uint256) estimatedCost; // AI-estimated implementation cost
-        mapping(uint256 => uint256) successProbability; // Probability of success (0-100)
-        mapping(uint256 => string[]) potentialRisks; // AI-identified potential risks
-        mapping(uint256 => string[]) benefitAnalysis; // AI-analyzed potential benefits
-        mapping(uint256 => uint256) stakeholderImpact; // Impact on different stakeholders
-        bool enablePredictiveModeling; // Enable predictive outcome modeling
-        mapping(uint256 => bytes32) analysisReports; // IPFS hash of detailed analysis
-        uint256 modelAccuracy; // Overall model accuracy percentage
-        mapping(string => uint256) modelWeights; // Weights for different analysis models
-        mapping(uint256 => bool) humanReviewRequired; // Flag for human review requirement
-        uint256 confidenceThreshold; // Minimum confidence for automated decisions
-    }
-    
-    struct ProposalAnalysis {
+    struct ConvictionVoting {
         uint256 proposalId;
-        uint256 overallScore; // Overall viability score (0-100)
-        uint256 technicalFeasibility;
-        uint256 economicViability;
-        uint256 socialImpact;
-        uint256 environmentalImpact;
-        uint256 riskScore;
-        string[] recommendations; // AI recommendations
-        uint256 analysisTimestamp;
-        bool analysisComplete;
+        mapping(address => uint256) convictionLevel; // conviction level per voter
+        mapping(address => uint256) lastVoteTime; // last vote timestamp per voter
+        uint256 totalConviction; // total conviction for proposal
+        uint256 convictionThreshold; // required conviction to pass
+        bool continuousVoting; // whether voting continues after proposal creation
     }
     
-    // Dynamic NFT Membership System with Utilities
-    struct NFTMembershipSystem {
-        uint256 systemId;
-        mapping(uint256 => MembershipNFT) membershipNFTs;
-        mapping(address => uint256[]) memberTokens; // Multiple NFTs per member
-        mapping(uint256 => NFTTier) tokenTiers; // NFT tier system
-        mapping(NFTTier => uint256) tierBenefits; // Benefits per tier
-        mapping(uint256 => uint256) nftVotingPower; // Voting power per NFT
-        mapping(uint256 => uint256) nftStakingRewards; // Staking rewards per NFT
-        mapping(uint256 => bytes32) nftMetadata; // Dynamic metadata IPFS hash
-        mapping(uint256 => uint256) nftExperience; // Experience points per NFT
-        mapping(uint256 => Achievement[]) nftAchievements; // Achievements per NFT
-        mapping(uint256 => uint256) nftCreationTime; // NFT creation timestamp
-        mapping(uint256 => bool) nftTransferable; // Transferability per NFT
-        uint256 maxNFTsPerMember; // Maximum NFTs per member
-        mapping(NFTTier => uint256) tierUpgradeRequirements; // Requirements for tier upgrade
-        mapping(uint256 => string[]) nftUtilities; // Utilities enabled by NFT
-        bool enableDynamicUpgrades; // Enable automatic tier upgrades
-        mapping(uint256 => uint256) nftLastActivity; // Last activity timestamp per NFT
-        uint256 activityDecayPeriod; // Period after which NFT benefits decay
+    struct ConvictionState {
+        uint256 convictionLevel;
+        uint256 lastUpdateTime;
+        bool supportingProposal;
+        uint256 stakingAmount; // amount staked to support conviction
     }
     
-    struct MembershipNFT {
-        uint256 tokenId;
-        address owner;
-        NFTTier tier;
-        uint256 votingPower;
-        uint256 reputationScore;
+    // Advanced Multi-Token Treasury Management
+    struct MultiTokenTreasury {
+        uint256 treasuryId;
+        mapping(address => TokenPosition) tokenPositions; // token holdings
+        mapping(address => bool) approvedTokens; // whitelist of approved tokens
+        mapping(address => uint256) tokenAllocations; // target allocations per token
+        mapping(address => TradingPair) tradingPairs; // trading pairs for rebalancing
+        mapping(bytes32 => DiversificationRule) diversificationRules; // diversification rules
+        mapping(address => uint256) yieldStrategies; // yield strategies per token
+        uint256 totalTreasuryValue; // total value in USD
+        mapping(address => PriceOracle) priceOracles; // price oracles per token
+        mapping(bytes32 => InvestmentProposal) investmentProposals; // investment proposals
+        mapping(address => uint256) tokenRiskScores; // risk scores per token
+        bool autoRebalancingEnabled; // automatic rebalancing
+        uint256 rebalanceThreshold; // threshold for triggering rebalance
+        mapping(address => uint256) lockedTokens; // tokens locked in governance
+        mapping(bytes32 => LiquidityPool) liquidityPools; // LP positions
+        uint256 emergencyWithdrawalLimit; // emergency withdrawal limit
+        mapping(address => bool) emergencyTokenAccess; // emergency access per token
+    }
+    
+    struct TokenPosition {
+        address token;
+        uint256 balance;
+        uint256 targetAllocation; // percentage
+        uint256 currentAllocation; // percentage
+        uint256 lastRebalance;
+        bool isYieldBearing;
+        uint256 yieldRate;
         uint256 stakingRewards;
-        string[] specialRoles;
+    }
+    
+    struct TradingPair {
+        address tokenA;
+        address tokenB;
+        address dexRouter;
+        uint256 slippageTolerance;
         bool isActive;
-        uint256 experiencePoints;
-        mapping(string => bool) unlockedFeatures;
+        uint256 lastTrade;
     }
     
-    enum NFTTier {
-        Bronze,     // 0
-        Silver,     // 1
-        Gold,       // 2
-        Platinum,   // 3
-        Diamond,    // 4
-        Legendary   // 5
-    }
-    
-    struct Achievement {
-        string name;
+    struct DiversificationRule {
+        bytes32 ruleId;
         string description;
-        uint256 timestamp;
-        uint256 rewardValue;
-        bool claimed;
+        uint256 maxConcentration; // max percentage in single asset
+        address[] excludedTokens; // tokens to exclude from rule
+        bool isActive;
+        uint256 priority;
     }
     
-    // Advanced Cross-Chain Bridge & Interoperability
-    struct CrossChainBridge {
-        uint256 bridgeId;
-        mapping(uint256 => bool) supportedChains; // Supported chain IDs
-        mapping(uint256 => address) chainContracts; // DAO contracts on other chains
-        mapping(bytes32 => CrossChainMessage) pendingMessages;
-        mapping(bytes32 => bool) processedMessages; // Prevent replay attacks
-        mapping(address => bool) authorizedRelayers; // Cross-chain message relayers
-        mapping(uint256 => uint256) chainVotingWeights; // Voting weight per chain
-        mapping(bytes32 => uint256) messageTimeouts; // Message timeout periods
-        mapping(uint256 => mapping(address => uint256)) chainMemberTokens; // Member tokens per chain
-        uint256 bridgeFee; // Fee for cross-chain operations
-        mapping(uint256 => bool) chainSyncEnabled; // Sync enabled per chain
-        mapping(bytes32 => address[]) messageValidators; // Validators per message
-        uint256 requiredValidations; // Required validations per message
-        mapping(bytes32 => mapping(address => bool)) validatorSignatures;
-        bool emergencyBridgeHalt; // Emergency bridge halt capability
-        mapping(uint256 => uint256) chainLatency; // Expected latency per chain
-        mapping(bytes32 => uint256) messageRetries; // Retry count per message
-        uint256 maxRetries; // Maximum retry attempts
-    }
-    
-    struct CrossChainMessage {
-        bytes32 messageId;
-        uint256 sourceChain;
-        uint256 targetChain;
-        bytes payload;
-        address sender;
-        uint256 timestamp;
-        uint256 nonce;
-        bool executed;
-        uint256 validationCount;
-    }
-    
-    // Sophisticated Treasury Diversification Engine
-    struct TreasuryDiversificationEngine {
-        uint256 engineId;
-        mapping(address => AssetAllocation) assetAllocations;
-        mapping(string => InvestmentStrategy) strategies;
-        mapping(address => uint256) riskRatings; // Risk rating per asset (0-100)
-        mapping(string => uint256) strategyPerformance; // Historical performance per strategy
-        uint256 totalPortfolioValue; // Total portfolio value in USD
-        mapping(address => uint256) assetPrices; // Current asset prices
-        mapping(string => uint256) allocationLimits; // Maximum allocation per asset type
-        bool enableAutoRebalancing; // Automatic portfolio rebalancing
-        uint256 rebalanceFrequency; // Rebalancing frequency in seconds
-        mapping(address => bool) approvedAssets; // Whitelist of approved assets
-        mapping(string => address[]) strategyAssets; // Assets in each strategy
-        uint256 emergencyLiquidityRatio; // Minimum liquidity ratio
-        mapping(address => uint256) yieldRates; // Current yield rates per asset
-        mapping(string => uint256) strategyRiskLimits; // Risk limits per strategy
-        bool enableYieldFarming; // Enable DeFi yield farming
-        mapping(address => address) lpTokens; // LP tokens for yield farming
-        uint256 impermanentLossThreshold; // Maximum acceptable IL
-        mapping(bytes32 => uint256) hedgingPositions; // Hedging positions
-    }
-    
-    struct AssetAllocation {
-        address asset;
-        uint256 targetAllocation; // Target allocation percentage
-        uint256 currentAllocation; // Current allocation percentage
-        uint256 minAllocation; // Minimum allocation percentage
-        uint256 maxAllocation; // Maximum allocation percentage
-        uint256 lastRebalance; // Last rebalancing timestamp
-        string assetType; // Asset type (Crypto, Stablecoin, Yield, etc.)
-    }
-    
-    struct InvestmentStrategy {
-        string name;
-        string description;
-        uint256 riskLevel; // 0-100
-        uint256 expectedReturn; // Expected annual return percentage
-        address[] requiredAssets;
-        uint256 minInvestment; // Minimum investment amount
-        bool active;
-        uint256 totalInvested;
-        uint256 currentValue;
-    }
-    
-    // Advanced Member Reputation & Skill System
-    struct AdvancedReputationSystem {
-        uint256 systemId;
-        mapping(address => MemberProfile) memberProfiles;
-        mapping(string => SkillCategory) skillCategories;
-        mapping(address => mapping(string => SkillRating)) memberSkills;
-        mapping(address => address[]) endorsements; // Member endorsements
-        mapping(address => mapping(address => mapping(string => uint256))) skillEndorsements;
-        mapping(address => uint256) overallReputation; // Overall reputation score
-        mapping(address => uint256) contributionValue; // Quantified contribution value
-        mapping(string => uint256) skillDemand; // Current demand for skills
-        mapping(address => string[]) completedProjects; // Completed projects per member
-        mapping(string => address[]) projectContributors; // Contributors per project
-        mapping(address => uint256) projectSuccessRate; // Success rate per member
-        uint256 reputationDecayRate; // Reputation decay over time
-        mapping(address => uint256) lastReputationUpdate;
-        mapping(address => Badge[]) memberBadges; // Achievement badges
-        mapping(string => BadgeRequirements) badgeRequirements;
-        bool enablePeerReview; // Enable peer review system
-        mapping(bytes32 => PeerReview) peerReviews; // Peer review records
-        uint256 reviewIncentive; // Incentive for providing reviews
-    }
-    
-    struct MemberProfile {
-        address memberAddress;
-        string publicProfile; // IPFS hash of public profile
-        uint256 joinDate;
-        uint256 totalContributions;
-        uint256 successfulProposals;
-        uint256 votingAccuracy; // How often member votes align with outcomes
-        string[] specializations;
-        uint256 mentorshipRating;
-        bool availableForMentorship;
-        uint256 responseTime; // Average response time to DAO activities
-    }
-    
-    struct SkillCategory {
-        string name;
-        string description;
-        uint256 weight; // Weight in overall reputation calculation
-        string[] subSkills;
-        uint256 certificationRequirement; // Required certifications
-        address[] verifiers; // Authorized skill verifiers
-    }
-    
-    struct SkillRating {
-        uint256 score; // 0-100
-        uint256 endorsementCount;
+    struct PriceOracle {
+        address oracleAddress;
+        uint256 lastPrice;
         uint256 lastUpdate;
-        bool certified;
-        address[] certifiers;
-        string[] evidence; // IPFS hashes of skill evidence
+        bool isActive;
+        uint256 deviation; // allowed price deviation
     }
     
-    struct Badge {
-        string name;
-        string description;
-        uint256 earnedDate;
-        uint256 value; // Badge value/rarity
-        string imageHash; // IPFS hash of badge image
-        bool transferable;
+    struct InvestmentProposal {
+        bytes32 proposalId;
+        address token;
+        uint256 amount;
+        string strategy;
+        uint256 expectedReturn;
+        uint256 riskLevel;
+        address[] supporters;
+        bool approved;
+        uint256 deadline;
     }
     
-    struct BadgeRequirements {
-        string badgeName;
-        uint256 requiredReputation;
-        string[] requiredSkills;
-        uint256[] skillThresholds;
-        uint256 requiredContributions;
-        bool renewable; // Whether badge needs to be renewed
-        uint256 validityPeriod;
+    struct LiquidityPool {
+        bytes32 poolId;
+        address poolAddress;
+        address tokenA;
+        address tokenB;
+        uint256 lpTokens;
+        uint256 rewards;
+        bool isActive;
     }
     
-    struct PeerReview {
-        bytes32 reviewId;
-        address reviewer;
-        address reviewee;
-        string category; // Skill category being reviewed
-        uint256 rating; // 0-100
-        string feedback; // IPFS hash of detailed feedback
-        uint256 timestamp;
-        bool verified;
-        uint256 helpfulnessRating; // How helpful the review was
+    // Advanced Governance Analytics & ML Predictions
+    struct MLGovernancePredictions {
+        uint256 systemId;
+        mapping(uint256 => ProposalPrediction) proposalPredictions; // ML predictions per proposal
+        mapping(address => VoterBehaviorProfile) voterProfiles; // voter behavior analysis
+        mapping(string => TrendAnalysis) governanceTrends; // trend analysis
+        mapping(uint256 => SentimentAnalysis) proposalSentiment; // sentiment analysis
+        mapping(bytes32 => PredictionAccuracy) modelAccuracy; // model accuracy tracking
+        mapping(address => PersonalizedRecommendations) memberRecommendations; // personalized recommendations
+        mapping(uint256 => InfluenceNetwork) influenceNetworks; // influence network analysis
+        mapping(string => EmergingIssue) emergingIssues; // emerging issues detection
+        bool enablePredictiveModeling; // enable ML predictions
+        mapping(bytes32 => ModelWeights) modelWeights; // ML model weights
+        uint256 predictionConfidenceThreshold; // minimum confidence for predictions
+        mapping(address => ExpertiseScoring) expertiseScores; // expertise scoring per member
+        mapping(uint256 => RiskAssessment) proposalRiskAssessments; // risk assessments
+        mapping(bytes32 => DataPrivacySettings) privacySettings; // privacy settings for ML
+        uint256 modelUpdateFrequency; // frequency of model updates
     }
     
-    // Real-Time Governance Analytics & Insights
-    struct GovernanceInsights {
-        uint256 insightId;
-        mapping(uint256 => ProposalMetrics) proposalMetrics;
-        mapping(address => ParticipationAnalytics) memberAnalytics;
-        mapping(string => uint256) topicTrends; // Trending topics in governance
-        mapping(uint256 => uint256) decisionSpeed; // Time from proposal to decision
-        mapping(address => uint256) influenceNetwork; // Member influence network
-        mapping(uint256 => uint256) controversyIndex; // Proposal controversy level
-        uint256 governanceHealthScore; // Overall governance health (0-100)
-        mapping(uint256 => string[]) discussionKeywords; // Keywords from discussions
-        mapping(address => uint256) consistencyScore; // Voting consistency per member
-        mapping(uint256 => uint256) implementationSuccess; // Implementation success rate
-        mapping(string => uint256) expertiseUtilization; // How well expertise is utilized
-        uint256 communityEngagement; // Overall community engagement level
-        mapping(uint256 => uint256) proposalComplexity; // Complexity analysis
-        mapping(address => string[]) preferredTopics; // Member topic preferences
-        mapping(uint256 => uint256) executionEfficiency; // Execution efficiency per proposal
-        bool enablePredictiveAnalytics; // Enable outcome prediction
-        mapping(uint256 => uint256) predictedSuccess; // AI-predicted success probability
-    }
-    
-    struct ProposalMetrics {
+    struct ProposalPrediction {
         uint256 proposalId;
-        uint256 discussionVolume; // Amount of discussion generated
-        uint256 expertInvolvement; // Level of expert involvement
-        uint256 communitySupport; // Community support level
-        uint256 implementationRisk; // Risk assessment for implementation
-        uint256 stakeholderAlignment; // Stakeholder alignment level
-        string[] keyDebatePoints; // Main points of debate
-        uint256 consensusLevel; // Level of consensus reached
+        uint256 passLikelihood; // 0-100 likelihood of passing
+        uint256 participationPrediction; // expected participation rate
+        uint256 controversyScore; // expected controversy level
+        string[] keyIssues; // predicted key issues
+        address[] keyInfluencers; // predicted key influencers
+        uint256 implementationDifficulty; // predicted implementation difficulty
+        uint256 communitySupport; // predicted community support
+        uint256 confidenceScore; // prediction confidence
     }
     
-    struct ParticipationAnalytics {
+    struct VoterBehaviorProfile {
+        address voter;
+        uint256 participationRate;
+        uint256 expertiseAlignment; // how often votes align with expertise
+        string[] preferredTopics;
+        uint256 influenceScore;
+        uint256 consistencyScore;
+        uint256[] votingPatterns; // historical voting patterns
+        bool isInfluencer; // whether considered an influencer
+        uint256 responsiveness; // how quickly responds to proposals
+    }
+    
+    struct TrendAnalysis {
+        string trendName;
+        uint256 trendScore; // strength of trend
+        uint256 duration; // how long trend has been active
+        string[] relatedTopics;
+        uint256 memberParticipation; // members participating in trend
+        bool isEmerging; // whether trend is emerging or declining
+        uint256 lastUpdate;
+    }
+    
+    struct SentimentAnalysis {
+        uint256 proposalId;
+        uint256 positiveScore; // 0-100
+        uint256 negativeScore; // 0-100
+        uint256 neutralScore; // 0-100
+        string[] positiveKeywords;
+        string[] negativeKeywords;
+        uint256 emotionalIntensity; // overall emotional intensity
+        mapping(address => uint256) memberSentiment; // sentiment per member
+    }
+    
+    struct PredictionAccuracy {
+        bytes32 modelId;
+        uint256 totalPredictions;
+        uint256 correctPredictions;
+        uint256 accuracyPercentage;
+        uint256 lastUpdate;
+        string[] performanceMetrics;
+    }
+    
+    struct PersonalizedRecommendations {
         address member;
-        uint256 proposalsVoted; // Number of proposals voted on
-        uint256 proposalsCreated; // Number of proposals created
-        uint256 discussionParticipation; // Level of discussion participation
-        uint256 expertiseContribution; // Contribution in area of expertise
-        uint256 mentorshipActivity; // Mentorship activity level
-        uint256 responseLatency; // Average response time to proposals
-        string[] activeTopics; // Topics member is most active in
-        uint256 influenceScore; // Member's influence on outcomes
+        uint256[] recommendedProposals; // proposals to pay attention to
+        string[] suggestedExpertise; // areas to develop expertise
+        address[] recommendedDelegates; // suggested delegates
+        string[] actionItems; // suggested actions for member
+        uint256 lastUpdateTime;
+    }
+    
+    struct InfluenceNetwork {
+        uint256 proposalId;
+        mapping(address => uint256) influenceScores; // influence score per member
+        mapping(address => address[]) influenceConnections; // connections per member
+        address[] keyInfluencers; // top influencers for this proposal
+        uint256 networkDensity; // how connected the network is
+        mapping(address => string[]) influenceReasons; // reasons for influence
+    }
+    
+    struct EmergingIssue {
+        string issueName;
+        uint256 urgencyScore; // 0-100
+        string description;
+        address[] concernedMembers; // members raising the issue
+        uint256 firstDetected; // when first detected
+        bool needsProposal; // whether a proposal is needed
+        string[] suggestedActions;
+    }
+    
+    struct ModelWeights {
+        bytes32 modelId;
+        mapping(string => uint256) featureWeights; // weights for different features
+        uint256 lastTraining; // last training timestamp
+        uint256 version; // model version
+        bool isActive; // whether model is active
+    }
+    
+    struct ExpertiseScoring {
+        address member;
+        mapping(string => uint256) topicExpertise; // expertise per topic
+        uint256 overallExpertiseScore;
+        uint256 expertiseGrowthRate; // rate of expertise growth
+        string[] recognizedExpertise; // officially recognized expertise areas
+        mapping(string => address[]) expertiseEndorsers; // who endorsed expertise
+    }
+    
+    struct RiskAssessment {
+        uint256 proposalId;
+        uint256 technicalRisk; // 0-100
+        uint256 financialRisk; // 0-100
+        uint256 reputationalRisk; // 0-100
+        uint256 legalRisk; // 0-100
+        uint256 overallRisk; // 0-100
+        string[] riskFactors; // identified risk factors
+        string[] mitigationStrategies; // suggested mitigation strategies
+    }
+    
+    struct DataPrivacySettings {
+        bytes32 settingId;
+        bool allowDataCollection;
+        bool allowPredictions;
+        bool allowPersonalization;
+        string[] dataTypes; // types of data that can be used
+        uint256 dataRetentionPeriod; // how long data is retained
+    }
+    
+    // Advanced Compliance & Legal Framework
+    struct ComplianceFramework {
+        uint256 frameworkId;
+        mapping(bytes32 => ComplianceRule) complianceRules; // compliance rules
+        mapping(address => ComplianceStatus) memberCompliance; // compliance status per member
+        mapping(uint256 => ComplianceCheck) proposalCompliance; // compliance check per proposal
+        mapping(string => RegulatoryRequirement) regulatoryRequirements; // regulatory requirements
+        mapping(bytes32 => AuditTrail) auditTrails; // audit trails
+        mapping(address => KYCStatus) kycStatus; // KYC status per member
+        mapping(string => JurisdictionRules) jurisdictionRules; // rules per jurisdiction
+        bool enableComplianceChecks; // enable automatic compliance checks
+        mapping(bytes32 => ComplianceReport) complianceReports; // compliance reports
+        mapping(address => uint256) complianceScores; // compliance scores per member
+        uint256 lastComplianceUpdate; // last compliance framework update
+        mapping(string => bool) enabledRegulations; // enabled regulations
+        mapping(bytes32 => ViolationRecord) violations; // violation records
+        bool enableAutomaticReporting; // automatic regulatory reporting
+        mapping(address => PrivacySettings) memberPrivacySettings; // privacy settings
+    }
+    
+    struct ComplianceRule {
+        bytes32 ruleId;
+        string description;
+        string regulatoryBasis; // which regulation this rule is based on
+        bool mandatory; // whether rule is mandatory
+        uint256 penaltyLevel; // penalty level for violation
+        string[] applicableJurisdictions;
+        bool isActive;
+        uint256 lastUpdate;
+    }
+    
+    struct ComplianceStatus {
+        address member;
+        bool isCompliant;
+        string[] violations; // current violations
+        uint256 complianceScore; // 0-100
+        uint256 lastCheck; // last compliance check
+        mapping(bytes32 => bool) ruleCompliance; // compliance per rule
+        bool requiresReview; // whether requires manual review
+    }
+    
+    struct ComplianceCheck {
+        uint256 proposalId;
+        bool passedCheck;
+        string[] flaggedIssues; // issues flagged during check
+        bytes32[] applicableRules; // rules that apply to this proposal
+        bool requiresLegalReview; // whether requires legal review
+        address reviewer; // assigned reviewer
+        uint256 checkTimestamp;
+    }
+    
+    struct RegulatoryRequirement {
+        string requirementName;
+        string description;
+        string jurisdiction;
+        bool mandatory;
+        uint256 deadline; // deadline for compliance
+        string[] requiredActions;
+        bool implemented;
+    }
+    
+    struct AuditTrail {
+        bytes32 trailId;
+        string action;
+        address actor;
+        uint256 timestamp;
+        bytes32 dataHash; // hash of relevant data
+        string description;
+        bool isPublic; // whether audit trail is public
+    }
+    
+    struct KYCStatus {
+        address member;
+        bool kycCompleted;
+        uint256 kycLevel; // different levels of KYC
+        string kycProvider; // KYC provider used
+        uint256 expiryDate; // when KYC expires
+        bool requiresRenewal;
+        mapping(string => bool) documentVerified; // document verification status
+    }
+    
+    struct JurisdictionRules {
+        string jurisdiction;
+        bytes32[] applicableRules;
+        bool kycRequired;
+        uint256 maxInvestment; // maximum investment allowed
+        string[] restrictedActivities;
+        bool isActive;
+    }
+    
+    struct ComplianceReport {
+        bytes32 reportId;
+        uint256 reportDate;
+        string reportType;
+        string jurisdiction;
+        bytes32 dataHash; // hash of report data
+        bool submitted; // whether submitted to authorities
+        address preparedBy;
+    }
+    
+    struct ViolationRecord {
+        bytes32 violationId;
+        address violator;
+        bytes32 ruleViolated;
+        string description;
+        uint256 timestamp;
+        uint256 penalty; // penalty imposed
+        bool resolved; // whether violation is resolved
+        string remedialAction; // action taken to resolve
+    }
+    
+    struct PrivacySettings {
+        address member;
+        bool allowDataSharing;
+        bool allowPublicProfile;
+        string[] dataCategories; // categories of data that can be shared
+        mapping(address => bool) authorizedAccess; // who can access data
+        uint256 dataRetentionPeriod;
+    }
+    
+    // Advanced Tokenomics & Economic Incentives
+    struct TokenomicsEngine {
+        uint256 engineId;
+        mapping(address => StakingPosition) stakingPositions; // staking positions per member
+        mapping(address => RewardHistory) rewardHistories; // reward history per member
+        mapping(string => IncentiveProgram) incentivePrograms; // various incentive programs
+        mapping(address => uint256) vestedTokens; // vested tokens per member
+        mapping(address => VestingSchedule) vestingSchedules; // vesting schedules
+        mapping(bytes32 => LiquidityIncentive) liquidityIncentives; // liquidity mining incentives
+        mapping(address => uint256) burnedTokens; // tokens burned per member
+        uint256 totalTokenSupply; // total token supply
+        uint256 inflationRate; // annual inflation rate
+        mapping(string => uint256) activityRewards; // rewards per activity type
+        mapping(address => uint256) contributionMultipliers; // multipliers based on contribution
+        bool enableDynamicRewards; // dynamic reward adjustment
+        mapping(uint256 => EconomicSnapshot) economicSnapshots; // economic state snapshots
+        uint256 treasuryYieldRate; // yield rate from treasury activities
+        mapping(address => uint256) loyaltyBonuses; // loyalty bonuses per member
+        uint256 lastEconomicUpdate; // last economic parameters update
+        mapping(string => uint256) behaviorIncentives; // incentives for specific behaviors
+    }
+    
+    struct StakingPosition {
+        address staker;
+        uint256 stakedAmount;
+        uint256 stakingStartTime;
+        uint256 lockupPeriod; // how long tokens are locked
+        uint256 rewardRate; // staking reward rate
+        bool isActive;
+        uint256 claimedRewards; // rewards already claimed
+        uint256 pendingRewards; // pending rewards
+        StakingTier stakingTier; // staking tier based on amount/duration
+    }
+    
+    enum StakingTier {
+        Basic,      // 0
+        Bronze,     // 1
+        Silver,     // 2
+        Gold,       // 3
+        Platinum,   // 4
+        Diamond     // 5
+    }
+    
+    struct RewardHistory {
+        address member;
+        uint256 totalRewardsEarned;
+        uint256 totalRewardsClaimed;
+        mapping(string => uint256) rewardsByType; // rewards by activity type
+        uint256[] rewardTimestamps; // timestamps of rewards
+        uint256[] rewardAmounts; // amounts of each reward
+        string[] rewardSources; // sources of each reward
+    }
+    
+    struct IncentiveProgram {
+        string programName;
+        string description;
+        uint256 totalRewardPool; // total rewards available
+        uint256 remainingRewards; // remaining rewards
+        uint256 startDate;
+        uint256 endDate;
+        mapping(address => bool) participants; // program participants
+        mapping(address => uint256) participantRewards; // rewards per participant
+        string[] eligibilityCriteria; // criteria for participation
+        bool isActive;
+        uint256 maxParticipants; // maximum number of participants
+    }
+    
+    struct VestingSchedule {
+        address beneficiary;
+        uint256 totalAmount; // total amount to be vested
+        uint256 releasedAmount; // amount already released
+        uint256 startTime; // vesting start time
+        uint256 duration; // total vesting duration
+        uint256 cliffPeriod; // cliff period before vesting starts
+        bool revocable; // whether vesting can be revoked
+        uint256 lastReleaseTime; // last time tokens were released
+    }
+    
+    struct LiquidityIncentive {
+        bytes32 incentiveId;
+        address poolAddress; // liquidity pool address
+        uint256 rewardRate; // reward rate for providing liquidity
+        uint256 totalRewards; // total rewards allocated
+        uint256 distributedRewards; // rewards already distributed
+        mapping(address => uint256) userLiquidity; // liquidity provided per user
+        mapping(address => uint256) userRewards; // rewards per user
+        bool isActive;
+        uint256 startTime;
+        uint256 endTime;
+    }
+    
+    struct EconomicSnapshot {
+        uint256 snapshotId;
+        uint256 timestamp;
+        uint256 totalSupply;
+        uint256 totalStaked;
+        uint256 treasuryValue;
+        uint256 averageRewardRate;
+        uint256 participationRate;
+        uint256 governanceActivity;
+        mapping(string => uint256) economicIndicators; // various economic indicators
     }
     
     // ============ EXISTING ENHANCED STRUCTS ============
+    // (Previous structs remain the same)
     
     // Enhanced Core Proposal Structure
     struct Proposal {
@@ -398,10 +572,10 @@ contract UltraEnhancedDAO is ERC721, ReentrancyGuard, AccessControl, Pausable {
         uint256 executionDeadline;
         bool urgent;
         uint256 budgetRequested;
-        address[] requiredApprovers; // Specific approvers needed
+        address[] requiredApprovers;
         mapping(address => bool) approverVotes;
         uint256 implementationTimeframe;
-        string[] deliverables; // Expected deliverables
+        string[] deliverables;
         mapping(string => bool) deliverablesCompleted;
     }
     
@@ -419,10 +593,10 @@ contract UltraEnhancedDAO is ERC721, ReentrancyGuard, AccessControl, Pausable {
     }
     
     enum ProposalCategory {
-        Low,      // Minor changes
-        Medium,   // Moderate impact
-        High,     // Significant impact
-        Critical  // System-wide changes
+        Low,
+        Medium,
+        High,
+        Critical
     }
     
     // Enhanced Member Structure
@@ -439,21 +613,21 @@ contract UltraEnhancedDAO is ERC721, ReentrancyGuard, AccessControl, Pausable {
         uint256 stakedTokens;
         bool isValidator;
         uint256 mentorshipScore;
-        uint256[] ownedNFTs; // NFT token IDs owned
-        mapping(string => uint256) skillLevels; // Skill levels per category
-        uint256 totalEarned; // Total tokens earned from contributions
-        string profileHash; // IPFS hash of member profile
-        bool publicProfile; // Whether profile is public
+        uint256[] ownedNFTs;
+        mapping(string => uint256) skillLevels;
+        uint256 totalEarned;
+        string profileHash;
+        bool publicProfile;
     }
     
     enum MemberTier {
-        Newcomer,   // 0
-        Bronze,     // 1
-        Silver,     // 2
-        Gold,       // 3
-        Platinum,   // 4
-        Diamond,    // 5
-        Elite       // 6
+        Newcomer,
+        Bronze,
+        Silver,
+        Gold,
+        Platinum,
+        Diamond,
+        Elite
     }
     
     // ============ STATE VARIABLES ============
@@ -463,25 +637,23 @@ contract UltraEnhancedDAO is ERC721, ReentrancyGuard, AccessControl, Pausable {
     mapping(address => Member) public members;
     mapping(address => bool) public isMember;
     
-    // Advanced system mappings
-    mapping(uint256 => EmergencyResponseSystem) public emergencySystem;
-    mapping(uint256 => AIProposalAnalyzer) public aiAnalyzers;
-    mapping(uint256 => NFTMembershipSystem) public nftSystems;
-    mapping(uint256 => CrossChainBridge) public crossChainBridges;
-    mapping(uint256 => TreasuryDiversificationEngine) public treasuryEngines;
-    mapping(uint256 => AdvancedReputationSystem) public reputationSystems;
-    mapping(uint256 => GovernanceInsights) public governanceInsights;
+    // New advanced system mappings
+    mapping(uint256 => LiquidDemocracySystem) public liquidDemocracySystems;
+    mapping(uint256 => QuadraticVotingSystem) public quadraticVotingSystems;
+    mapping(uint256 => MultiTokenTreasury) public multiTokenTreasuries;
+    mapping(uint256 => MLGovernancePredictions) public mlPredictionSystems;
+    mapping(uint256 => ComplianceFramework) public complianceFrameworks;
+    mapping(uint256 => TokenomicsEngine) public tokenomicsEngines;
     
     // System counters
     Counters.Counter public proposalCount;
     Counters.Counter public memberCount;
-    Counters.Counter public emergencySystemCount;
-    Counters.Counter public aiAnalyzerCount;
-    Counters.Counter public nftSystemCount;
-    Counters.Counter public bridgeCount;
-    Counters.Counter public treasuryEngineCount;
-    Counters.Counter public reputationSystemCount;
-    Counters.Counter public insightSystemCount;
+    Counters.Counter public liquidDemocracySystemCount;
+    Counters.Counter public quadraticVotingSystemCount;
+    Counters.Counter public multiTokenTreasuryCount;
+    Counters.Counter public mlPredictionSystemCount;
+    Counters.Counter public complianceFrameworkCount;
+    Counters.Counter public tokenomicsEngineCount;
     
     // Configuration
     struct DAOConfig {
@@ -495,26 +667,27 @@ contract UltraEnhancedDAO is ERC721, ReentrancyGuard, AccessControl, Pausable {
         uint256 stakingRewardRate;
         uint256 minStakingAmount;
         bool enableTierSystem;
-        bool enableEmergencySystem;
-        bool enableAIAnalysis;
-        bool enableNFTMembership;
-        bool enableCrossChain;
-        bool enableAdvancedReputation;
-        uint256 maxProposalsPerMember; // Max proposals per member per period
-        uint256 proposalCooldown; // Cooldown between proposals
-        bool enableGovernanceInsights;
-        uint256 emergencyActivationThreshold; // Threshold for emergency activation
+        bool enableLiquidDemocracy;
+        bool enableQuadraticVoting;
+        bool enableMultiTokenTreasury;
+        bool enableMLPredictions;
+        bool enableComplianceFramework;
+        bool enableAdvancedTokenomics;
+        uint256 maxProposalsPerMember;
+        uint256 proposalCooldown;
+        uint256 delegationCooldown;
+        uint256 maxDelegationChain;
     }
     
     DAOConfig public daoConfig;
     
     // Additional state variables
-    mapping(address => uint256) public lastProposalTime; // Proposal cooldown tracking
-    mapping(address => uint256) public proposalsThisPeriod; // Proposal count per period
-    uint256 public currentPeriodStart; // Current governance period start
-    uint256 public governancePeriodDuration; // Duration of governance periods
-    bool public emergencyMode; // Global emergency mode flag
-    uint256 public lastEmergencyActivation; // Last emergency activation timestamp
+    mapping(address => uint256) public lastProposalTime;
+    mapping(address => uint256) public proposalsThisPeriod;
+    uint256 public currentPeriodStart;
+    uint256 public governancePeriodDuration;
+    bool public emergencyMode;
+    uint256 public lastEmergencyActivation;
     
     // ============ EVENTS ============
     
@@ -524,160 +697,17 @@ contract UltraEnhancedDAO is ERC721, ReentrancyGuard, AccessControl, Pausable {
     event ProposalExecuted(uint256 indexed proposalId, bool success);
     event MemberJoined(address indexed member, uint256 tokenId);
     
-    // Advanced system events
-    event EmergencyActivated(uint256 indexed systemId, CrisisLevel level, address coordinator);
-    event EmergencyResolved(uint256 indexed emergencyId, bool successful);
-    event AIAnalysisCompleted(uint256 indexed proposalId, uint256 overallScore, uint256 riskScore);
-    event NFTMembershipUpgraded(uint256 indexed tokenId, NFTTier newTier);
-    event CrossChainMessageSent(bytes32 indexed messageId, uint256 sourceChain, uint256 targetChain);
-    event CrossChainMessageReceived(bytes32 indexed messageId, uint256 sourceChain);
-    event TreasuryRebalanced(uint256 indexed engineId, uint256 newTotalValue);
-    event ReputationUpdated(address indexed member, uint256 newReputation, string category);
-    event SkillEndorsed(address indexed member, address indexed endorser, string skill);
-    event BadgeEarned(address indexed member, string badgeName);
-    event PeerReviewSubmitted(bytes32 indexed reviewId, address reviewer, address reviewee);
-    event GovernanceInsightGenerated(uint256 indexed insightId, string insightType, uint256 value);
-    event MemberTierUpdated(address indexed member, MemberTier newTier);
-    event EmergencyFundUsed(uint256 amount, string reason);
-    
-    // ============ MODIFIERS ============
-    
-    modifier onlyMember() {
-        require(isMember[msg.sender], "Not a DAO member");
-        _;
-    }
-    
-    modifier onlyActiveMember() {
-        require(isMember[msg.sender] && members[msg.sender].isActive, "Not an active member");
-        _;
-    }
-    
-    modifier proposalExists(uint256 _proposalId) {
-        require(_proposalId < proposalCount.current(), "Proposal does not exist");
-        _;
-    }
-    
-    modifier votingActive(uint256 _proposalId) {
-        require(
-            block.timestamp >= proposals[_proposalId].startTime &&
-            block.timestamp <= proposals[_proposalId].endTime,
-            "Voting period not active"
-        );
-        _;
-    }
-    
-    modifier onlyTier(MemberTier _minTier) {
-        require(uint256(members[msg.sender].tier) >= uint256(_minTier), "Insufficient member tier");
-        _;
-    }
-    
-    modifier whenNotEmergency() {
-        require(!emergencyMode, "Emergency mode active");
-        _;
-    }
-    
-    modifier onlyEmergencyCoordinator() {
-        require(hasRole(EMERGENCY_COORDINATOR_ROLE, msg.sender), "Not an emergency coordinator");
-        _;
-    }
-    
-    modifier proposalRateLimit() {
-        require(
-            block.timestamp >= lastProposalTime[msg.sender] + daoConfig.proposalCooldown,
-            "Proposal cooldown not met"
-        );
-        require(
-            proposalsThisPeriod[msg.sender] < daoConfig.maxProposalsPerMember,
-            "Max proposals per period exceeded"
-        );
-        _;
-    }
-    
-    // ============ CONSTRUCTOR ============
-    
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        address _treasuryAddress
-    ) ERC721(_name, _symbol) {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(ADMIN_ROLE, msg.sender);
-        _grantRole(EMERGENCY_COORDINATOR_ROLE, msg.sender);
-        
-        daoConfig = DAOConfig({
-            minProposalThreshold: 1000 * 10**18,
-            votingPeriod: 7 days,
-            quorumThreshold: 10,
-            passingThreshold: 51,
-            membershipFee: 0.1 ether,
-            proposalFee: 0.01 ether,
-            treasuryAddress: _treasuryAddress,
-            stakingRewardRate: 5,
-            minStakingAmount: 100 * 10**18,
-            enableTierSystem: true,
-            enableEmergencySystem: true,
-            enableAIAnalysis: true,
-            enableNFTMembership: true,
-            enableCrossChain: false,
-            enableAdvancedReputation: true,
-            maxProposalsPerMember: 5,
-            proposalCooldown: 1 days,
-            enableGovernanceInsights: true,
-            emergencyActivationThreshold: 3
-        });
-        
-        governancePeriodDuration = 30 days;
-        currentPeriodStart = block.timestamp;
-        
-        _initializeDefaultSystems();
-    }
-    
-    // ============ CORE MEMBERSHIP FUNCTIONS ============
-    
-    function joinDAO() external payable nonReentrant whenNotPaused {
-        require(msg.value >= daoConfig.membershipFee, "Insufficient membership fee");
-        require(!isMember[msg.sender], "Already a member");
-        
-        uint256 tokenId = memberCount.current();
-        memberCount.increment();
-        _safeMint(msg.sender, tokenId);
-        
-        members[msg.sender] = Member({
-            memberAddress: msg.sender,
-            joinDate: block.timestamp,
-            votingPower: 1,
-            reputationScore: 100,
-            isActive: true,
-            expertiseAreas: new string[](0),
-            contributionScore: 0,
-            lastActiveTime: block.timestamp,
-            tier: MemberTier.Newcomer,
-            stakedTokens: 0,
-            isValidator: false,
-            mentorshipScore: 0,
-            ownedNFTs: new uint256[](0),
-            totalEarned: 0,
-            profileHash: "",
-            publicProfile: false
-        });
-        
-        isMember[msg.sender] = true;
-        
-        // Mint NFT membership if enabled
-        if (daoConfig.enableNFTMembership && nftSystemCount.current() > 0) {
-            _mintMembershipNFT(msg.sender, NFTTier.Bronze);
-        }
-        
-        payable(daoConfig.treasuryAddress).transfer(msg.value);
-        emit MemberJoined(msg.sender, tokenId);
-    }
-    
-    function createProposal(
-        string memory _title,
-        string memory _description,
-        bytes32 _ipfsHash,
-        ProposalType _proposalType,
-        ProposalCategory _category,
-        uint256 _budgetRequested,
-    
-     
+    // New advanced system events
+    event DelegationSet(address indexed delegator, address indexed delegate, string topic);
+    event DelegationRevoked(address indexed delegator, address indexed delegate);
+    event QuadraticVoteCast(uint256 indexed proposalId, address indexed voter, uint256 credits);
+    event ConvictionVoteUpdated(uint256 indexed proposalId, address indexed voter, uint256 conviction);
+    event TokenPositionUpdated(address indexed token, uint256 newBalance, uint256 newAllocation);
+    event TreasuryRebalanced(uint256 indexed treasuryId, uint256 timestamp);
+    event MLPredictionGenerated(uint256 indexed proposalId, uint256 passLikelihood, uint256 confidence);
+    event ComplianceCheckCompleted(uint256 indexed proposalId, bool passed, string[] issues);
+    event StakingPositionCreated(address indexed staker, uint256 amount, StakingTier tier);
+    event RewardDistributed(address indexed recipient, uint256 amount, string rewardType);
+    event VestingScheduleCreated(address indexed beneficiary, uint256 totalAmount, uint256 duration);
+    event LiquidityIncentiveActivated(bytes32 indexed incentiveId, address pool, uint256 rewardRate);
+    event EconomicSnapshot
